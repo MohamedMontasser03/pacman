@@ -1,0 +1,8 @@
+1 - Level System
+    Level 0 is used for the main menu bgm and map "Mostly Ignored"
+2 - Map System
+    WALL = 0
+    BISCUIT = 1
+    EMPTY = 2
+    BLOCK = 3
+    PILL = 4
