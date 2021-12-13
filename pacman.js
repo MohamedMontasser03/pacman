@@ -722,6 +722,10 @@ Pacman.Audio = function (game) {
     progressEvents = [],
     playing = [];
 
+  function isBG(name) {
+    return !isNaN(name);
+  }
+
   function load(name, path, cb) {
     var f = (files[name] = document.createElement("audio"));
 
@@ -733,7 +737,7 @@ Pacman.Audio = function (game) {
     f.setAttribute("preload", "true");
     f.setAttribute("autobuffer", "true");
     f.setAttribute("src", path);
-    if (!isNaN(name)) {
+    if (isBG(name)) {
       f.setAttribute("loop", "true");
     }
     f.pause();
@@ -755,6 +759,7 @@ Pacman.Audio = function (game) {
       files[playing[i]].pause();
       files[playing[i]].currentTime = 0;
     }
+    pauseBG();
     playing = [];
   }
 
@@ -788,7 +793,16 @@ Pacman.Audio = function (game) {
 
   function playBG(name) {
     bgPlaying = files[name];
-    play(name);
+    if (!game.soundDisabled()) {
+      bgPlaying.play().catch((err) => {
+        console.log("Failed to AutoPlay BG audio");
+      });
+    }
+  }
+
+  function pauseBG() {
+    bgPlaying.pause();
+    bgPlaying.currentTime = 0;
   }
 
   function pause() {
@@ -810,12 +824,14 @@ Pacman.Audio = function (game) {
     pause: pause,
     resume: resume,
     playBG: playBG,
+    pauseBG: pauseBG,
   };
 };
 
 var PACMAN = (function () {
   var state = WAITING,
     audio = null,
+    levelData = null,
     ghosts = [],
     ghostSpecs = ["#00FFDE", "#FF0000", "#FFB8DE", "#FFB847"],
     eatenCount = 0,
@@ -870,6 +886,7 @@ var PACMAN = (function () {
 
   function startNewGame() {
     console.log("From Menu To Level One 'Counter'");
+    audio.pauseBG();
     setState(WAITING);
     level = 1;
     user.reset();
@@ -1010,6 +1027,7 @@ var PACMAN = (function () {
                 : "Going to Main Menu"
             }`
           );
+          audio.pauseBG();
           timerStart = tick;
         }
       }
@@ -1054,6 +1072,9 @@ var PACMAN = (function () {
         map.draw(ctx);
         setState(PLAYING);
         console.log(`Start level ${level}`);
+        if (Object.keys(levelData).length > level) {
+          audio.playBG(level);
+        }
       } else {
         if (diff !== lastTime) {
           lastTime = diff;
@@ -1078,6 +1099,7 @@ var PACMAN = (function () {
   function completedLevel() {
     setState(WAITING);
     console.log(`Beat Level ${level} Starting Level ${level + 1} 'Counter'`);
+    audio.pauseBG();
     level += 1;
     map.reset();
     user.newLevel();
@@ -1134,14 +1156,19 @@ var PACMAN = (function () {
       ["eating2", root + "audio/eating.short." + extension],
     ];
 
-    let levels = 1;
-    for (let i = 0; i < levels; i++) {
-      audio_files.push([`${i}`, root + `audio/bg-music/${i}.` + extension]);
-    }
+    fetch("./levels.json")
+      .then((res) => res.json())
+      .then((data) => {
+        levelData = data;
 
-    load(audio_files, function () {
-      loaded();
-    });
+        for (let i = 0; i < Object.keys(data).length; i++) {
+          audio_files.push([`${i}`, root + data[i]["BG-Music-" + extension]]);
+        }
+
+        load(audio_files, function () {
+          loaded();
+        });
+      });
   }
 
   function load(arr, callback) {
