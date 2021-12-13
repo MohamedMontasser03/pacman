@@ -8,6 +8,8 @@
  * do proper ghost mechanics (blinky/wimpy etc)
  */
 
+let dev = true;
+
 var NONE = 4,
   UP = 3,
   LEFT = 2,
@@ -60,7 +62,7 @@ Pacman.Ghost = function (game, map, colour) {
   }
 
   function isDangerous() {
-    return eaten === null;
+    return eaten === null && !dev;
   }
 
   function isHidden() {
@@ -70,15 +72,15 @@ Pacman.Ghost = function (game, map, colour) {
   function getRandomDirection() {
     var moves =
       direction === LEFT || direction === RIGHT ? [UP, DOWN] : [LEFT, RIGHT];
-    return moves[Math.floor(Math.random() * 2)];
+    return moves;
   }
 
   function reset() {
     eaten = null;
     eatable = null;
     position = { x: 90, y: 80 };
-    direction = getRandomDirection();
-    due = getRandomDirection();
+    direction = getRandomDirection()[Math.floor(Math.random() * 2)];
+    due = getRandomDirection()[Math.floor(Math.random() * 2)];
   }
 
   function onWholeSquare(x) {
@@ -215,12 +217,19 @@ Pacman.Ghost = function (game, map, colour) {
   }
 
   function pane(pos) {
-    if (pos.y === 100 && pos.x >= 190 && direction === RIGHT) {
-      return { y: 100, x: -10 };
+    if (pos.x >= 190 && direction === RIGHT) {
+      return { y: pos.y, x: -10 };
     }
 
-    if (pos.y === 100 && pos.x <= -10 && direction === LEFT) {
-      return (position = { y: 100, x: 190 });
+    if (pos.x <= -10 && direction === LEFT) {
+      return { y: pos.y, x: 190 };
+    }
+    if (pos.y >= 220 && direction === DOWN) {
+      return { y: -10, x: pos.x };
+    }
+
+    if (pos.y <= -10 && direction === UP) {
+      return { y: 220, x: pos.x };
     }
 
     return false;
@@ -258,7 +267,15 @@ Pacman.Ghost = function (game, map, colour) {
         x: pointToCoord(nextSquare(npos.x, direction)),
       })
     ) {
-      due = getRandomDirection();
+      due = getRandomDirection()[Math.floor(Math.random() * 2)];
+      if (
+        map.isWallSpace({
+          y: pointToCoord(nextSquare(npos.y, due)),
+          x: pointToCoord(nextSquare(npos.x, due)),
+        })
+      ) {
+        due = oppositeDirection(direction);
+      }
       return move(ctx);
     }
 
@@ -269,7 +286,7 @@ Pacman.Ghost = function (game, map, colour) {
       position = tmp;
     }
 
-    due = getRandomDirection();
+    due = getRandomDirection()[Math.floor(Math.random() * 2)];
 
     return {
       new: position,
@@ -295,6 +312,7 @@ Pacman.User = function (game, map) {
     due = null,
     lives = null,
     score = 5,
+    toeat = 210,
     keyMap = {};
 
   keyMap[KEY.ARROW_LEFT] = LEFT;
@@ -330,6 +348,13 @@ Pacman.User = function (game, map) {
   function newLevel() {
     resetPosition();
     eaten = 0;
+    toeat = 0;
+    for (let i = 0; i < Pacman.MAP.length; i++) {
+      for (let j = 0; j < Pacman.MAP[i].length; j++) {
+        const el = Pacman.MAP[i][j];
+        if (el === Pacman.BISCUIT || el === Pacman.PILL) ++toeat;
+      }
+    }
   }
 
   function resetPosition() {
@@ -428,12 +453,19 @@ Pacman.User = function (game, map) {
       return { new: position, old: position };
     }
 
-    if (npos.y === 100 && npos.x >= 190 && direction === RIGHT) {
-      npos = { y: 100, x: -10 };
+    if (npos.x >= 190 && direction === RIGHT) {
+      npos = { y: npos.y, x: -10 };
     }
 
-    if (npos.y === 100 && npos.x <= -12 && direction === LEFT) {
-      npos = { y: 100, x: 190 };
+    if (npos.x <= -10 && direction === LEFT) {
+      npos = { y: npos.y, x: 190 };
+    }
+    if (npos.y >= 220 && direction === DOWN) {
+      npos = { y: -10, x: npos.x };
+    }
+
+    if (npos.y <= -10 && direction === UP) {
+      npos = { y: 220, x: npos.x };
     }
 
     position = npos;
@@ -450,7 +482,7 @@ Pacman.User = function (game, map) {
       addScore(block === Pacman.BISCUIT ? 10 : 50);
       eaten += 1;
 
-      if (eaten === 12) {
+      if (eaten === toeat) {
         game.completedLevel();
       }
 
@@ -615,11 +647,11 @@ Pacman.Map = function (size) {
   }
 
   function block(pos) {
-    return map[pos.y][pos.x];
+    return map[Math.abs(pos.y % map.length)][pos.x];
   }
 
   function setBlock(pos, type) {
-    map[pos.y][pos.x] = type;
+    map[Math.abs(pos.y % map.length)][pos.x] = type;
   }
 
   function drawPills(ctx) {
@@ -669,7 +701,7 @@ Pacman.Map = function (size) {
   }
 
   function drawBlock(y, x, ctx) {
-    var layout = map[y][x];
+    var layout = map[Math.abs(y % map.length)][x];
 
     if (layout === Pacman.PILL) {
       return;
@@ -886,6 +918,10 @@ var PACMAN = (function () {
 
   function startNewGame() {
     console.log("From Menu To Level One 'Counter'");
+
+    Pacman.MAP = levelData[1].map;
+    Pacman.WALLS = levelData[1].walls;
+    // map = new Pacman.Map(blockSize);
     audio.pauseBG();
     setState(WAITING);
     level = 1;
@@ -925,6 +961,9 @@ var PACMAN = (function () {
       console.log(`Restart Level ${level} 'Counter'`);
     } else {
       console.log("Lost Game Go to menu");
+      Pacman.MAP = levelData[0].map;
+      Pacman.WALLS = levelData[0].walls;
+      map.reset();
     }
   }
 
@@ -1069,18 +1108,18 @@ var PACMAN = (function () {
       diff = 5 + Math.floor((timerStart - tick) / Pacman.FPS);
 
       if (diff === 0) {
-        map.draw(ctx);
         setState(PLAYING);
         console.log(`Start level ${level}`);
         if (Object.keys(levelData).length > level) {
           audio.playBG(level);
         }
+        map.draw(ctx);
       } else {
         if (diff !== lastTime) {
           lastTime = diff;
           map.draw(ctx);
-          dialog("Starting in: " + diff);
         }
+        dialog("Starting in: " + diff);
       }
     }
 
@@ -1101,6 +1140,10 @@ var PACMAN = (function () {
     console.log(`Beat Level ${level} Starting Level ${level + 1} 'Counter'`);
     audio.pauseBG();
     level += 1;
+    if (Object.keys(levelData).length > level) {
+      Pacman.MAP = levelData[level].map;
+      Pacman.WALLS = levelData[level].walls;
+    }
     map.reset();
     user.newLevel();
     startLevel();
@@ -1114,52 +1157,59 @@ var PACMAN = (function () {
   }
 
   function init(wrapper, root) {
-    var i,
-      len,
-      ghost,
-      blockSize = wrapper.offsetWidth / 19,
-      canvas = document.createElement("canvas");
-
-    canvas.setAttribute("width", blockSize * 19 + "px");
-    canvas.setAttribute("height", blockSize * 22 + 30 + "px");
-
-    wrapper.appendChild(canvas);
-
-    ctx = canvas.getContext("2d");
-
-    audio = new Pacman.Audio({ soundDisabled: soundDisabled });
-    map = new Pacman.Map(blockSize);
-    user = new Pacman.User(
-      {
-        completedLevel: completedLevel,
-        eatenPill: eatenPill,
-      },
-      map
-    );
-
-    for (i = 0, len = ghostSpecs.length; i < len; i += 1) {
-      ghost = new Pacman.Ghost({ getTick: getTick }, map, ghostSpecs[i]);
-      ghosts.push(ghost);
-    }
-
-    map.draw(ctx);
-    dialog("Loading ...");
-
-    var extension = Modernizr.audio.ogg ? "ogg" : "mp3";
-
-    var audio_files = [
-      ["start", root + "audio/opening_song." + extension],
-      ["die", root + "audio/die." + extension],
-      ["eatghost", root + "audio/eatghost." + extension],
-      ["eatpill", root + "audio/eatpill." + extension],
-      ["eating", root + "audio/eating.short." + extension],
-      ["eating2", root + "audio/eating.short." + extension],
-    ];
-
     fetch("./levels.json")
       .then((res) => res.json())
       .then((data) => {
+        var i,
+          len,
+          ghost,
+          blockSize = wrapper.offsetWidth / 19,
+          canvas = document.createElement("canvas");
+
+        if (dev) {
+          ghostSpecs = [];
+        }
+
         levelData = data;
+
+        canvas.setAttribute("width", blockSize * 19 + "px");
+        canvas.setAttribute("height", blockSize * 22 + 30 + "px");
+
+        wrapper.appendChild(canvas);
+
+        ctx = canvas.getContext("2d");
+        Pacman.MAP = data[0].map;
+        Pacman.WALLS = data[0].walls;
+
+        audio = new Pacman.Audio({ soundDisabled: soundDisabled });
+        map = new Pacman.Map(blockSize);
+
+        user = new Pacman.User(
+          {
+            completedLevel: completedLevel,
+            eatenPill: eatenPill,
+          },
+          map
+        );
+
+        for (i = 0, len = ghostSpecs.length; i < len; i += 1) {
+          ghost = new Pacman.Ghost({ getTick: getTick }, map, ghostSpecs[i]);
+          ghosts.push(ghost);
+        }
+
+        map.draw(ctx);
+        dialog("Loading ...");
+
+        var extension = Modernizr.audio.ogg ? "ogg" : "mp3";
+
+        var audio_files = [
+          ["start", root + "assets/audio/opening_song." + extension],
+          ["die", root + "assets/audio/die." + extension],
+          ["eatghost", root + "assets/audio/eatghost." + extension],
+          ["eatpill", root + "assets/audio/eatpill." + extension],
+          ["eating", root + "assets/audio/eating.short." + extension],
+          ["eating2", root + "assets/audio/eating.short." + extension],
+        ];
 
         for (let i = 0; i < Object.keys(data).length; i++) {
           audio_files.push([`${i}`, root + data[i]["BG-Music-" + extension]]);
