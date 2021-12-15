@@ -8,7 +8,7 @@
  * do proper ghost mechanics (blinky/wimpy etc)
  */
 
-let dev = true;
+let dev = false;
 
 var NONE = 4,
   UP = 3,
@@ -172,7 +172,7 @@ Pacman.Ghost = function (game, map, colour, img) {
       [LEFT]: [1, 1, 0, 0, 0],
       [RIGHT]: [-1, 1, 1, 0, 0],
       [UP]: [-1, 1, 0, 0, 1],
-      [DOWN]: [-1, 1, 1, 1, -1],
+      [DOWN]: [-1, 1, 1, 18 / 54, -1],
     };
 
     if (sprite) {
@@ -180,8 +180,31 @@ Pacman.Ghost = function (game, map, colour, img) {
       let t = transform[direction];
       ctx.setTransform(t[0], 0, 0, t[1], left, top); // sets scale and origin
       ctx.rotate((Math.PI * t[4]) / 2);
-      ctx.drawImage(sprite, -sprite.width * t[2], -sprite.height * t[3]);
+
+      var dy = eaten ? 36 : 0;
+      ctx.drawImage(
+        sprite,
+        0,
+        +isVunerable() * 18 + dy,
+        18,
+        18,
+        -sprite.width * t[2],
+        -sprite.height * t[3],
+        18,
+        18
+      );
       ctx.restore();
+      // ctx.drawImage(
+      //   sprite,
+      //   0,
+      //   +isVunerable() * 18 + dy,
+      //   18,
+      //   18,
+      //   left,
+      //   top,
+      //   18,
+      //   18
+      // );
     } else {
       ctx.fillStyle = getColour();
       ctx.beginPath();
@@ -859,8 +882,10 @@ Pacman.Audio = function (game) {
   }
 
   function pauseBG() {
-    bgPlaying.pause();
-    bgPlaying.currentTime = 0;
+    if (bgPlaying) {
+      bgPlaying.pause();
+      bgPlaying.currentTime = 0;
+    }
   }
 
   function pause() {
