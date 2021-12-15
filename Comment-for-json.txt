@@ -1,8 +1,32 @@
 1 - Level System
     Level 0 is used for the main menu bgm and map "Mostly Ignored"
-2 - Map System
-    WALL = 0
-    BISCUIT = 1
-    EMPTY = 2
-    BLOCK = 3
-    PILL = 4
+2 - Music System
+    For the music just type the location of the audio file just like the way it'S 
+    done in the json file
+3 - Map System
+    1 - the map matrix
+      the map matrix is 19x22
+      where each number represents the corresponding BLOCK
+      ------
+      WALL = 0
+      BISCUIT = 1
+      EMPTY = 2
+      BLOCK = 3
+      PILL = 4
+      ------
+      (note that if you set a block to wall it won't draw a wall but the player won't be able to move through the block)
+    2 - the wall matrix
+      the wall matrix is used to draw the walls and it uses the 19x22 coordinates 
+      (because there are three different types of coordinate systems in this game and i don't know the point)
+      so if you write 
+      "line": [0.5, 18.5]
+      it will draw a line from your current point to point 0.5, 18.5
+      and you change your current location with the move command
+      
+      as for the curves you just define the two points at the ends of the curve and it draws it
+      and you'll get used to the system quickly when you use it
+4 - Ghost System
+    Each Object in the ghosts array represents a ghosts (there are as many ghosts as there are
+    objects in the array)
+
+    each object has to have an img attribute if left empty will use the default ghost renderer
