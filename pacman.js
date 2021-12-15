@@ -25,12 +25,13 @@ var NONE = 4,
 
 Pacman.FPS = 30;
 
-Pacman.Ghost = function (game, map, colour) {
+Pacman.Ghost = function (game, map, colour, img) {
   var position = null,
     direction = null,
     eatable = null,
     eaten = null,
-    due = null;
+    sprite = null;
+  due = null;
 
   function getNewCoord(dir, current) {
     var speed = isVunerable() ? 1 : isHidden() ? 4 : 2,
@@ -72,15 +73,19 @@ Pacman.Ghost = function (game, map, colour) {
   function getRandomDirection() {
     var moves =
       direction === LEFT || direction === RIGHT ? [UP, DOWN] : [LEFT, RIGHT];
-    return moves;
+    return moves[Math.floor(Math.random() * 2)];
   }
 
   function reset() {
     eaten = null;
     eatable = null;
+    if (img !== "") {
+      sprite = document.createElement("img");
+      sprite.src = img;
+    }
     position = { x: 90, y: 80 };
-    direction = getRandomDirection()[Math.floor(Math.random() * 2)];
-    due = getRandomDirection()[Math.floor(Math.random() * 2)];
+    direction = getRandomDirection();
+    due = getRandomDirection();
   }
 
   function onWholeSquare(x) {
@@ -162,58 +167,75 @@ Pacman.Ghost = function (game, map, colour) {
     var high = game.getTick() % 10 > 5 ? 3 : -3;
     var low = game.getTick() % 10 > 5 ? -3 : 3;
 
-    ctx.fillStyle = getColour();
-    ctx.beginPath();
+    // scale scale (flip) x, y, deg
+    var transform = {
+      [LEFT]: [1, 1, 0, 0, 0],
+      [RIGHT]: [-1, 1, 1, 0, 0],
+      [UP]: [-1, 1, 0, 0, 1],
+      [DOWN]: [-1, 1, 1, 1, -1],
+    };
 
-    ctx.moveTo(left, base);
+    if (sprite) {
+      ctx.save();
+      let t = transform[direction];
+      ctx.setTransform(t[0], 0, 0, t[1], left, top); // sets scale and origin
+      ctx.rotate((Math.PI * t[4]) / 2);
+      ctx.drawImage(sprite, -sprite.width * t[2], -sprite.height * t[3]);
+      ctx.restore();
+    } else {
+      ctx.fillStyle = getColour();
+      ctx.beginPath();
 
-    ctx.quadraticCurveTo(left, top, left + s / 2, top);
-    ctx.quadraticCurveTo(left + s, top, left + s, base);
+      ctx.moveTo(left, base);
 
-    // Wavy things at the bottom
-    ctx.quadraticCurveTo(tl - inc * 1, base + high, tl - inc * 2, base);
-    ctx.quadraticCurveTo(tl - inc * 3, base + low, tl - inc * 4, base);
-    ctx.quadraticCurveTo(tl - inc * 5, base + high, tl - inc * 6, base);
-    ctx.quadraticCurveTo(tl - inc * 7, base + low, tl - inc * 8, base);
-    ctx.quadraticCurveTo(tl - inc * 9, base + high, tl - inc * 10, base);
+      ctx.quadraticCurveTo(left, top, left + s / 2, top);
+      ctx.quadraticCurveTo(left + s, top, left + s, base);
 
-    ctx.closePath();
-    ctx.fill();
+      // Wavy things at the bottom
+      ctx.quadraticCurveTo(tl - inc * 1, base + high, tl - inc * 2, base);
+      ctx.quadraticCurveTo(tl - inc * 3, base + low, tl - inc * 4, base);
+      ctx.quadraticCurveTo(tl - inc * 5, base + high, tl - inc * 6, base);
+      ctx.quadraticCurveTo(tl - inc * 7, base + low, tl - inc * 8, base);
+      ctx.quadraticCurveTo(tl - inc * 9, base + high, tl - inc * 10, base);
 
-    ctx.beginPath();
-    ctx.fillStyle = "#FFF";
-    ctx.arc(left + 6, top + 6, s / 6, 0, 300, false);
-    ctx.arc(left + s - 6, top + 6, s / 6, 0, 300, false);
-    ctx.closePath();
-    ctx.fill();
+      ctx.closePath();
+      ctx.fill();
 
-    var f = s / 12;
-    var off = {};
-    off[RIGHT] = [f, 0];
-    off[LEFT] = [-f, 0];
-    off[UP] = [0, -f];
-    off[DOWN] = [0, f];
+      ctx.beginPath();
+      ctx.fillStyle = "#FFF";
+      ctx.arc(left + 6, top + 6, s / 6, 0, 300, false);
+      ctx.arc(left + s - 6, top + 6, s / 6, 0, 300, false);
+      ctx.closePath();
+      ctx.fill();
 
-    ctx.beginPath();
-    ctx.fillStyle = "#000";
-    ctx.arc(
-      left + 6 + off[direction][0],
-      top + 6 + off[direction][1],
-      s / 15,
-      0,
-      300,
-      false
-    );
-    ctx.arc(
-      left + s - 6 + off[direction][0],
-      top + 6 + off[direction][1],
-      s / 15,
-      0,
-      300,
-      false
-    );
-    ctx.closePath();
-    ctx.fill();
+      var f = s / 12;
+      var off = {};
+      off[RIGHT] = [f, 0];
+      off[LEFT] = [-f, 0];
+      off[UP] = [0, -f];
+      off[DOWN] = [0, f];
+
+      ctx.beginPath();
+      ctx.fillStyle = "#000";
+      ctx.arc(
+        left + 6 + off[direction][0],
+        top + 6 + off[direction][1],
+        s / 15,
+        0,
+        300,
+        false
+      );
+      ctx.arc(
+        left + s - 6 + off[direction][0],
+        top + 6 + off[direction][1],
+        s / 15,
+        0,
+        300,
+        false
+      );
+      ctx.closePath();
+      ctx.fill();
+    }
   }
 
   function pane(pos) {
@@ -267,11 +289,15 @@ Pacman.Ghost = function (game, map, colour) {
         x: pointToCoord(nextSquare(npos.x, direction)),
       })
     ) {
-      due = getRandomDirection()[Math.floor(Math.random() * 2)];
+      due = getRandomDirection();
       if (
         map.isWallSpace({
           y: pointToCoord(nextSquare(npos.y, due)),
           x: pointToCoord(nextSquare(npos.x, due)),
+        }) &&
+        map.isWallSpace({
+          y: pointToCoord(nextSquare(npos.y, oppositeDirection(due))),
+          x: pointToCoord(nextSquare(npos.x, oppositeDirection(due))),
         })
       ) {
         due = oppositeDirection(direction);
@@ -286,7 +312,7 @@ Pacman.Ghost = function (game, map, colour) {
       position = tmp;
     }
 
-    due = getRandomDirection()[Math.floor(Math.random() * 2)];
+    due = getRandomDirection();
 
     return {
       new: position,
@@ -865,7 +891,6 @@ var PACMAN = (function () {
     audio = null,
     levelData = null,
     ghosts = [],
-    ghostSpecs = ["#00FFDE", "#FF0000", "#FFB8DE", "#FFB847"],
     eatenCount = 0,
     level = 0,
     tick = 0,
@@ -907,13 +932,10 @@ var PACMAN = (function () {
   }
 
   function startLevel() {
-    user.resetPosition();
-    for (var i = 0; i < ghosts.length; i += 1) {
-      ghosts[i].reset();
-    }
     audio.play("start");
     timerStart = tick;
     setState(COUNTDOWN);
+    InitGhosts(level);
   }
 
   function startNewGame() {
@@ -922,7 +944,6 @@ var PACMAN = (function () {
     Pacman.MAP = levelData[1].map;
     Pacman.WALLS = levelData[1].walls;
     // map = new Pacman.Map(blockSize);
-    audio.pauseBG();
     setState(WAITING);
     level = 1;
     user.reset();
@@ -1034,6 +1055,9 @@ var PACMAN = (function () {
     u = user.move(ctx);
 
     for (i = 0, len = ghosts.length; i < len; i += 1) {
+      if (!ghostPos[i]) {
+        return;
+      }
       redrawBlock(ghostPos[i].old);
     }
     redrawBlock(u.old);
@@ -1089,7 +1113,7 @@ var PACMAN = (function () {
       map.draw(ctx);
       dialog("Press N to start a New game");
       console.log("Initail Render Of main menu");
-      audio.playBG("0");
+      // audio.playBG("0");
     } else if (state === EATEN_PAUSE && tick - timerStart > Pacman.FPS / 3) {
       map.draw(ctx);
       setState(PLAYING);
@@ -1166,10 +1190,6 @@ var PACMAN = (function () {
           blockSize = wrapper.offsetWidth / 19,
           canvas = document.createElement("canvas");
 
-        if (dev) {
-          ghostSpecs = [];
-        }
-
         levelData = data;
 
         canvas.setAttribute("width", blockSize * 19 + "px");
@@ -1191,11 +1211,6 @@ var PACMAN = (function () {
           },
           map
         );
-
-        for (i = 0, len = ghostSpecs.length; i < len; i += 1) {
-          ghost = new Pacman.Ghost({ getTick: getTick }, map, ghostSpecs[i]);
-          ghosts.push(ghost);
-        }
 
         map.draw(ctx);
         dialog("Loading ...");
@@ -1239,6 +1254,17 @@ var PACMAN = (function () {
     document.addEventListener("keypress", keyPress, true);
 
     timer = window.setInterval(mainLoop, 1000 / Pacman.FPS);
+  }
+
+  function InitGhosts(level) {
+    ghosts = [];
+    for (let i = 0; i < levelData[level].ghosts.length; i++) {
+      const el = levelData[level].ghosts[i];
+
+      ghost = new Pacman.Ghost({ getTick: getTick }, map, "#FF0000", el.img);
+      ghost.reset();
+      ghosts.push(ghost);
+    }
   }
 
   return {
