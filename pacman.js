@@ -170,9 +170,9 @@ Pacman.Ghost = function (game, map, colour, img) {
     // scale scale (flip) x, y, deg
     var transform = {
       [LEFT]: [1, 1, 0, 0, 0],
-      [RIGHT]: [-1, 1, 1, 0, 0],
+      [RIGHT]: [-1, 1, 18 / 36, 0, 0],
       [UP]: [-1, 1, 0, 0, 1],
-      [DOWN]: [-1, 1, 1, 18 / 54, -1],
+      [DOWN]: [-1, 1, 18 / 36, 18 / 54, -1],
     };
 
     if (sprite) {
@@ -184,7 +184,7 @@ Pacman.Ghost = function (game, map, colour, img) {
       var dy = eaten ? 36 : 0;
       ctx.drawImage(
         sprite,
-        0,
+        18 * (Math.trunc(game.getTick() / 3) % 2),
         +isVunerable() * 18 + dy,
         18,
         18,
@@ -194,17 +194,7 @@ Pacman.Ghost = function (game, map, colour, img) {
         18
       );
       ctx.restore();
-      // ctx.drawImage(
-      //   sprite,
-      //   0,
-      //   +isVunerable() * 18 + dy,
-      //   18,
-      //   18,
-      //   left,
-      //   top,
-      //   18,
-      //   18
-      // );
+      // ctx.drawImage(sprite, 0, 0, 18, 18, left, top, 18, 18);
     } else {
       ctx.fillStyle = getColour();
       ctx.beginPath();
