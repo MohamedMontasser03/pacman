@@ -21,6 +21,7 @@ var NONE = 4,
   COUNTDOWN = 8,
   EATEN_PAUSE = 9,
   DYING = 10,
+  BOX = 12,
   Pacman = {};
 
 Pacman.FPS = 30;
@@ -30,8 +31,8 @@ Pacman.Ghost = function (game, map, colour, img) {
     direction = null,
     eatable = null,
     eaten = null,
+    due = null,
     sprite = null;
-  due = null;
 
   function getNewCoord(dir, current) {
     var speed = isVunerable() ? 1 : isHidden() ? 4 : 2,
@@ -63,7 +64,7 @@ Pacman.Ghost = function (game, map, colour, img) {
   }
 
   function isDangerous() {
-    return eaten === null && !dev;
+    return eaten === null;
   }
 
   function isHidden() {
@@ -79,13 +80,13 @@ Pacman.Ghost = function (game, map, colour, img) {
   function reset() {
     eaten = null;
     eatable = null;
+    position = { x: 90, y: 80 };
+    direction = getRandomDirection();
+    due = getRandomDirection();
     if (img !== "") {
       sprite = document.createElement("img");
       sprite.src = img;
     }
-    position = { x: 90, y: 80 };
-    direction = getRandomDirection();
-    due = getRandomDirection();
   }
 
   function onWholeSquare(x) {
@@ -906,6 +907,7 @@ var PACMAN = (function () {
     audio = null,
     levelData = null,
     ghosts = [],
+    box = null,
     eatenCount = 0,
     level = 0,
     tick = 0,
@@ -969,7 +971,12 @@ var PACMAN = (function () {
 
   function keyDown(e) {
     if (e.keyCode === KEY.N) {
-      startNewGame();
+      if (state === WAITING) {
+        startNewGame();
+      } else if (state === BOX) {
+        box.style.setProperty("display", "none");
+        setState(PLAYING);
+      }
     } else if (e.keyCode === KEY.S) {
       audio.disableSound();
       localStorage["soundDisabled"] = !soundDisabled();
@@ -1128,7 +1135,10 @@ var PACMAN = (function () {
       map.draw(ctx);
       dialog("Press N to start a New game");
       console.log("Initail Render Of main menu");
-      // audio.playBG("0");
+    } else if (state === BOX && stateChanged) {
+      stateChanged = false;
+      map.draw(ctx);
+      handleTextBox();
     } else if (state === EATEN_PAUSE && tick - timerStart > Pacman.FPS / 3) {
       map.draw(ctx);
       setState(PLAYING);
@@ -1147,7 +1157,11 @@ var PACMAN = (function () {
       diff = 5 + Math.floor((timerStart - tick) / Pacman.FPS);
 
       if (diff === 0) {
-        setState(PLAYING);
+        if (levelData[level].box) {
+          setState(BOX);
+        } else {
+          setState(PLAYING);
+        }
         console.log(`Start level ${level}`);
         if (Object.keys(levelData).length > level) {
           audio.playBG(level);
@@ -1210,6 +1224,25 @@ var PACMAN = (function () {
         canvas.setAttribute("width", blockSize * 19 + "px");
         canvas.setAttribute("height", blockSize * 22 + 30 + "px");
 
+        box = document.createElement("div");
+        box.classList.add("text-box");
+        box.style.setProperty("display", "none");
+
+        ///////
+        let para = document.createElement("p");
+        para.classList.add("para");
+        para.innerText = "0";
+        ///////
+        ///////
+        let img = document.createElement("img");
+        img.classList.add("box-img");
+        img.src = "";
+        ///////
+
+        box.appendChild(img);
+        box.appendChild(para);
+        wrapper.appendChild(box);
+
         wrapper.appendChild(canvas);
 
         ctx = canvas.getContext("2d");
@@ -1230,19 +1263,19 @@ var PACMAN = (function () {
         map.draw(ctx);
         dialog("Loading ...");
 
-        var extension = Modernizr.audio.ogg ? "ogg" : "mp3";
+        var extension = Modernizr.audio.ogg ? ".ogg" : ".mp3";
 
         var audio_files = [
-          ["start", root + "assets/audio/opening_song." + extension],
-          ["die", root + "assets/audio/die." + extension],
-          ["eatghost", root + "assets/audio/eatghost." + extension],
-          ["eatpill", root + "assets/audio/eatpill." + extension],
-          ["eating", root + "assets/audio/eating.short." + extension],
-          ["eating2", root + "assets/audio/eating.short." + extension],
+          ["start", root + "assets/audio/opening_song" + extension],
+          ["die", root + "assets/audio/die" + extension],
+          ["eatghost", root + "assets/audio/eatghost" + extension],
+          ["eatpill", root + "assets/audio/eatpill" + extension],
+          ["eating", root + "assets/audio/eating.short" + extension],
+          ["eating2", root + "assets/audio/eating.short" + extension],
         ];
 
         for (let i = 0; i < Object.keys(data).length; i++) {
-          audio_files.push([`${i}`, root + data[i]["BG-Music-" + extension]]);
+          audio_files.push([`${i}`, root + data[i]["BG-Music"] + extension]);
         }
 
         load(audio_files, function () {
@@ -1280,6 +1313,13 @@ var PACMAN = (function () {
       ghost.reset();
       ghosts.push(ghost);
     }
+  }
+
+  function handleTextBox() {
+    box.children[1].textContent =
+      levelData[level].box.msg + "\n\n\t\t Press N to start the game";
+    box.children[0].src = levelData[level].box.img;
+    box.style.removeProperty("display");
   }
 
   return {

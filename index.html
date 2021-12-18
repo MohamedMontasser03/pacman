@@ -17,6 +17,7 @@
       height: 450px;
       width: 342px;
       margin: 20px auto;
+      position: relative;
     }
 
     #shim {
@@ -38,6 +39,35 @@
 
     a {
       text-decoration: none;
+    }
+
+    .text-box {
+      font-family: BDCartoonShoutRegular;
+      background-color: black;
+      padding: 1rem 2rem;
+      border: 0.4rem solid blue;
+      border-radius: 15px;
+      box-sizing: border-box;
+      position: absolute;
+      min-width: 120%;
+      left: 50%;
+      top: 198px;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      line-height: 2rem;
+    }
+
+    .para {
+      color: yellow;
+      padding: 0;
+      margin: 0;
+      white-space: pre;
+    }
+
+    .box-img {
+      height: 10rem;
     }
   </style>
 
