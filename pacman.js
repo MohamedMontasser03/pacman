@@ -920,6 +920,7 @@ var PACMAN = (function () {
     timer = null,
     map = null,
     user = null,
+    died = false,
     stored = null;
 
   function getTick() {
@@ -953,6 +954,7 @@ var PACMAN = (function () {
     timerStart = tick;
     setState(COUNTDOWN);
     InitGhosts(level);
+    console.log("d");
   }
 
   function startNewGame() {
@@ -1001,6 +1003,7 @@ var PACMAN = (function () {
     user.loseLife();
     if (user.getLives() > 0) {
       startLevel();
+      died = true;
       console.log(`Restart Level ${level} 'Counter'`);
     } else {
       console.log("Lost Game Go to menu");
@@ -1157,9 +1160,10 @@ var PACMAN = (function () {
       diff = 5 + Math.floor((timerStart - tick) / Pacman.FPS);
 
       if (diff === 0) {
-        if (levelData[level].box) {
+        if (levelData[level].box && !died) {
           setState(BOX);
         } else {
+          died = false;
           setState(PLAYING);
         }
         console.log(`Start level ${level}`);
