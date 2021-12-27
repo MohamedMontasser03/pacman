@@ -954,7 +954,6 @@ var PACMAN = (function () {
     timerStart = tick;
     setState(COUNTDOWN);
     InitGhosts(level);
-    console.log("d");
   }
 
   function startNewGame() {
