@@ -9,6 +9,10 @@
  */
 
 let dev = false;
+const mapWidth = 19,
+  mapHeight = 22,
+  blockSize = 32,
+  footerHeight = 12 + blockSize;
 
 var NONE = 4,
   UP = 3,
@@ -185,14 +189,14 @@ Pacman.Ghost = function (game, map, colour, img) {
       var dy = eaten ? 36 : 0;
       ctx.drawImage(
         sprite,
-        18 * (Math.trunc(game.getTick() / 3) % 2),
-        +isVunerable() * 18 + dy,
-        18,
-        18,
+        blockSize * (Math.trunc(game.getTick() / 3) % 2),
+        +isVunerable() * blockSize + dy,
+        blockSize,
+        blockSize,
         -sprite.width * t[2],
         -sprite.height * t[3],
-        18,
-        18
+        blockSize,
+        blockSize
       );
       ctx.restore();
       // ctx.drawImage(sprite, 0, 0, 18, 18, left, top, 18, 18);
@@ -217,8 +221,15 @@ Pacman.Ghost = function (game, map, colour, img) {
 
       ctx.beginPath();
       ctx.fillStyle = "#FFF";
-      ctx.arc(left + 6, top + 6, s / 6, 0, 300, false);
-      ctx.arc(left + s - 6, top + 6, s / 6, 0, 300, false);
+      ctx.arc(left + blockSize / 3, top + blockSize / 3, s / 6, 0, 300, false);
+      ctx.arc(
+        left + s - blockSize / 3,
+        top + blockSize / 3,
+        s / 6,
+        0,
+        300,
+        false
+      );
       ctx.closePath();
       ctx.fill();
 
@@ -232,16 +243,16 @@ Pacman.Ghost = function (game, map, colour, img) {
       ctx.beginPath();
       ctx.fillStyle = "#000";
       ctx.arc(
-        left + 6 + off[direction][0],
-        top + 6 + off[direction][1],
+        left + blockSize / 3 + off[direction][0],
+        top + blockSize / 3 + off[direction][1],
         s / 15,
         0,
         300,
         false
       );
       ctx.arc(
-        left + s - 6 + off[direction][0],
-        top + 6 + off[direction][1],
+        left + s - blockSize / 3 + off[direction][0],
+        top + blockSize / 3 + off[direction][1],
         s / 15,
         0,
         300,
@@ -939,10 +950,10 @@ var PACMAN = (function () {
 
   function dialog(text) {
     ctx.fillStyle = "#FFFF00";
-    ctx.font = "14px BDCartoonShoutRegular";
+    ctx.font = `${0.8 * blockSize}px BDCartoonShoutRegular`;
     var width = ctx.measureText(text).width,
       x = (map.width * map.blockSize - width) / 2;
-    ctx.fillText(text, x, map.height * 10 + 8);
+    ctx.fillText(text, x, blockSize * 13);
   }
 
   function soundDisabled() {
@@ -1026,10 +1037,10 @@ var PACMAN = (function () {
 
   function drawFooter() {
     var topLeft = map.height * map.blockSize,
-      textBase = topLeft + 17;
+      textBase = topLeft + blockSize - 1;
 
     ctx.fillStyle = "#000000";
-    ctx.fillRect(0, topLeft, map.width * map.blockSize, 30);
+    ctx.fillRect(0, topLeft, map.width * map.blockSize, footerHeight);
 
     ctx.fillStyle = "#FFFF00";
 
@@ -1037,12 +1048,12 @@ var PACMAN = (function () {
       ctx.fillStyle = "#FFFF00";
       ctx.beginPath();
       ctx.moveTo(
-        150 + 25 * i + map.blockSize / 2,
+        1.4 * blockSize * i + map.blockSize * 8.83,
         topLeft + 1 + map.blockSize / 2
       );
 
       ctx.arc(
-        150 + 25 * i + map.blockSize / 2,
+        1.4 * blockSize * i + map.blockSize * 8.83,
         topLeft + 1 + map.blockSize / 2,
         map.blockSize / 2,
         Math.PI * 0.25,
@@ -1053,14 +1064,14 @@ var PACMAN = (function () {
     }
 
     ctx.fillStyle = !soundDisabled() ? "#00FF00" : "#FF0000";
-    ctx.font = "bold 16px sans-serif";
+    ctx.font = `bold ${0.9 * blockSize}px sans-serif`;
     //ctx.fillText("♪", 10, textBase);
     ctx.fillText("s", 10, textBase);
 
     ctx.fillStyle = "#FFFF00";
-    ctx.font = "14px BDCartoonShoutRegular";
-    ctx.fillText("Score: " + user.theScore(), 30, textBase);
-    ctx.fillText("Level: " + level, 260, textBase);
+    ctx.font = `${0.8 * blockSize}px BDCartoonShoutRegular`;
+    ctx.fillText("Score: " + user.theScore(), blockSize * 1.67, textBase);
+    ctx.fillText("Level: " + level, 14.5 * blockSize, textBase);
   }
 
   function redrawBlock(pos) {
@@ -1219,13 +1230,20 @@ var PACMAN = (function () {
         var i,
           len,
           ghost,
-          blockSize = wrapper.offsetWidth / 19,
           canvas = document.createElement("canvas");
 
         levelData = data;
 
-        canvas.setAttribute("width", blockSize * 19 + "px");
-        canvas.setAttribute("height", blockSize * 22 + 30 + "px");
+        canvas.setAttribute("width", blockSize * mapWidth + "px");
+        canvas.setAttribute(
+          "height",
+          blockSize * mapHeight + footerHeight + "px"
+        );
+        wrapper.style.setProperty("width", blockSize * mapWidth + "px");
+        wrapper.style.setProperty(
+          "height",
+          blockSize * mapHeight + footerHeight + "px"
+        );
 
         box = document.createElement("div");
         box.classList.add("text-box");
