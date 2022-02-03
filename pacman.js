@@ -615,6 +615,54 @@ Pacman.User = function (game, map) {
     ctx.fill();
   }
 
+  function getTouches(e) {
+    return e.touches;
+  }
+
+  function handleTouchStart(e) {
+    const firstTouch = getTouches(e)[0];
+    xDown = firstTouch.clientX;
+    yDown = firstTouch.clientY;
+    document.body.style.setProperty("overscroll-behavior-y", "contain");
+  }
+  function handleTouchEnd(e) {
+    document.body.style.setProperty("overscroll-behavior-y", "initial");
+  }
+
+  function handleTouchMove(e) {
+    if (!xDown || !yDown) {
+      return;
+    }
+    e.preventDefault();
+
+    var xUp = e.touches[0].clientX;
+    var yUp = e.touches[0].clientY;
+
+    var xDiff = xDown - xUp;
+    var yDiff = yDown - yUp;
+
+    if (Math.abs(xDiff) > Math.abs(yDiff)) {
+      if (xDiff > 0) {
+        /* left swipe */
+        due = LEFT;
+      } else {
+        /* right swipe */
+        due = RIGHT;
+      }
+    } else {
+      if (yDiff > 0) {
+        /* up swipe */
+        due = UP;
+      } else {
+        /* down swipe */
+        due = DOWN;
+      }
+    }
+    /* reset values */
+    xDown = null;
+    yDown = null;
+  }
+
   initUser();
 
   return {
@@ -630,6 +678,9 @@ Pacman.User = function (game, map) {
     newLevel: newLevel,
     reset: reset,
     resetPosition: resetPosition,
+    handleTouchMove,
+    handleTouchStart,
+    handleTouchEnd,
   };
 };
 
@@ -932,7 +983,9 @@ var PACMAN = (function () {
     map = null,
     user = null,
     died = false,
-    stored = null;
+    stored = null,
+    offsetX = null,
+    offsetY = null;
 
   function getTick() {
     return tick;
@@ -964,7 +1017,7 @@ var PACMAN = (function () {
     audio.play("start");
     timerStart = tick;
     setState(COUNTDOWN);
-    InitGhosts(level);
+    initGhosts(level);
   }
 
   function startNewGame() {
@@ -1244,6 +1297,8 @@ var PACMAN = (function () {
           "height",
           blockSize * mapHeight + footerHeight + "px"
         );
+        offsetX = wrapper.offsetLeft - (mapWidth / 2) * blockSize;
+        offsetY = wrapper.offsetTop;
 
         box = document.createElement("div");
         box.classList.add("text-box");
@@ -1253,8 +1308,7 @@ var PACMAN = (function () {
         let para = document.createElement("p");
         para.classList.add("para");
         para.innerText = "0";
-        ///////
-        ///////
+
         let img = document.createElement("img");
         img.classList.add("box-img");
         img.src = "";
@@ -1280,6 +1334,11 @@ var PACMAN = (function () {
           },
           map
         );
+        wrapper.addEventListener("click", handlePress);
+
+        wrapper.addEventListener("touchstart", user.handleTouchStart, false);
+        wrapper.addEventListener("touchmove", user.handleTouchMove, false);
+        wrapper.addEventListener("touchend", user.handleTouchEnd, false);
 
         map.draw(ctx);
         dialog("Loading ...");
@@ -1325,7 +1384,7 @@ var PACMAN = (function () {
     timer = window.setInterval(mainLoop, 1000 / Pacman.FPS);
   }
 
-  function InitGhosts(level) {
+  function initGhosts(level) {
     ghosts = [];
     for (let i = 0; i < levelData[level].ghosts.length; i++) {
       const el = levelData[level].ghosts[i];
@@ -1341,6 +1400,34 @@ var PACMAN = (function () {
       levelData[level].box.msg + "\n\n\t\t Press N to start the game";
     box.children[0].src = levelData[level].box.img;
     box.style.removeProperty("display");
+  }
+
+  function handlePress(e) {
+    if (
+      e.x - offsetX < blockSize &&
+      e.y - offsetY - mapHeight * blockSize + window.scrollY > 0
+    ) {
+      audio.disableSound();
+      localStorage["soundDisabled"] = !soundDisabled();
+      return;
+    }
+
+    if (state === WAITING) {
+      startNewGame();
+    } else if (state === BOX) {
+      box.style.setProperty("display", "none");
+      setState(PLAYING);
+    } else if (state === PAUSE) {
+      audio.resume();
+      map.draw(ctx);
+      setState(stored);
+    } else if (state === PLAYING) {
+      stored = state;
+      setState(PAUSE);
+      audio.pause();
+      map.draw(ctx);
+      dialog("Paused");
+    }
   }
 
   return {
