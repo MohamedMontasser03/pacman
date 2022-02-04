@@ -985,7 +985,8 @@ var PACMAN = (function () {
     died = false,
     stored = null,
     offsetX = null,
-    offsetY = null;
+    offsetY = null,
+    canvasWrapper = null;
 
   function getTick() {
     return tick;
@@ -1287,6 +1288,8 @@ var PACMAN = (function () {
 
         levelData = data;
 
+        canvasWrapper = wrapper;
+
         canvas.setAttribute("width", blockSize * mapWidth + "px");
         canvas.setAttribute(
           "height",
@@ -1334,11 +1337,6 @@ var PACMAN = (function () {
           },
           map
         );
-        wrapper.addEventListener("click", handlePress);
-
-        wrapper.addEventListener("touchstart", user.handleTouchStart, false);
-        wrapper.addEventListener("touchmove", user.handleTouchMove, false);
-        wrapper.addEventListener("touchend", user.handleTouchEnd, false);
 
         map.draw(ctx);
         dialog("Loading ...");
@@ -1380,6 +1378,11 @@ var PACMAN = (function () {
 
     document.addEventListener("keydown", keyDown, true);
     document.addEventListener("keypress", keyPress, true);
+    canvasWrapper.addEventListener("click", handlePress);
+
+    canvasWrapper.addEventListener("touchstart", user.handleTouchStart, false);
+    canvasWrapper.addEventListener("touchmove", user.handleTouchMove, false);
+    canvasWrapper.addEventListener("touchend", user.handleTouchEnd, false);
 
     timer = window.setInterval(mainLoop, 1000 / Pacman.FPS);
   }
