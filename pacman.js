@@ -172,34 +172,28 @@ Pacman.Ghost = function (game, map, colour, img) {
     var high = game.getTick() % 10 > 5 ? 3 : -3;
     var low = game.getTick() % 10 > 5 ? -3 : 3;
 
-    // scale scale (flip) x, y, deg
     var transform = {
-      [LEFT]: [1, 1, 0, 0, 0],
-      [RIGHT]: [-1, 1, 18 / 36, 0, 0],
-      [UP]: [-1, 1, 0, 0, 1],
-      [DOWN]: [-1, 1, 18 / 36, 18 / 54, -1],
+      [LEFT]: 2,
+      [RIGHT]: 1,
+      [UP]: 0,
+      [DOWN]: 3,
     };
 
     if (sprite) {
-      ctx.save();
-      let t = transform[direction];
-      ctx.setTransform(t[0], 0, 0, t[1], left, top); // sets scale and origin
-      ctx.rotate((Math.PI * t[4]) / 2);
+      var dy = eaten ? blockSize * 2 : 0;
 
-      var dy = eaten ? 36 : 0;
       ctx.drawImage(
         sprite,
-        blockSize * (Math.trunc(game.getTick() / 3) % 2),
+        blockSize *
+          ((Math.trunc(game.getTick() / 3) % 2) + transform[direction] * 2),
         +isVunerable() * blockSize + dy,
         blockSize,
         blockSize,
-        -sprite.width * t[2],
-        -sprite.height * t[3],
+        left,
+        top,
         blockSize,
         blockSize
       );
-      ctx.restore();
-      // ctx.drawImage(sprite, 0, 0, 18, 18, left, top, 18, 18);
     } else {
       ctx.fillStyle = getColour();
       ctx.beginPath();
@@ -1289,12 +1283,18 @@ var PACMAN = (function () {
         levelData = data;
 
         canvasWrapper = wrapper;
+        var canvasWidth = blockSize * mapWidth;
 
-        canvas.setAttribute("width", blockSize * mapWidth + "px");
+        canvas.setAttribute("width", canvasWidth + "px");
         canvas.setAttribute(
           "height",
           blockSize * mapHeight + footerHeight + "px"
         );
+
+        if (innerWidth < canvasWidth) {
+          document.body.style.setProperty("width", `${canvasWidth}px`);
+        }
+
         wrapper.style.setProperty("width", blockSize * mapWidth + "px");
         wrapper.style.setProperty(
           "height",
@@ -1305,7 +1305,6 @@ var PACMAN = (function () {
 
         box = document.createElement("div");
         box.classList.add("text-box");
-        box.style.setProperty("display", "none");
 
         ///////
         let para = document.createElement("p");
@@ -1322,6 +1321,19 @@ var PACMAN = (function () {
         wrapper.appendChild(box);
 
         wrapper.appendChild(canvas);
+        if (box.clientWidth > innerWidth) {
+          var canvasPadding = 100;
+          box.style.setProperty(
+            "transform",
+            `scale(${
+              (innerWidth - canvasPadding) / box.clientWidth
+            }) translate(-${
+              (box.clientWidth - (innerWidth - canvasPadding)) / 2
+            }px, calc(-50% - ${footerHeight}px))`
+          );
+          box.style.setProperty("left", `0`);
+        }
+        box.style.setProperty("display", "none");
 
         ctx = canvas.getContext("2d");
         Pacman.MAP = data[0].map;
