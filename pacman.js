@@ -873,7 +873,6 @@ Pacman.Audio = function (game) {
   }
 
   function progress(event, name, callback) {
-    alert(name);
     if (event.loaded === event.total && typeof callback === "function") {
       callback();
       files[name].removeEventListener(
