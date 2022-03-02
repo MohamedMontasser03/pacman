@@ -865,6 +865,7 @@ Pacman.Audio = function (game) {
     f.setAttribute("preload", "true");
     f.setAttribute("autobuffer", "true");
     f.setAttribute("src", path);
+    f.load();
     if (isBG(name)) {
       f.setAttribute("loop", "true");
     }
@@ -872,6 +873,7 @@ Pacman.Audio = function (game) {
   }
 
   function progress(event, name, callback) {
+    alert(name);
     if (event.loaded === event.total && typeof callback === "function") {
       callback();
       files[name].removeEventListener(
@@ -1367,7 +1369,6 @@ var PACMAN = (function () {
         for (let i = 0; i < Object.keys(data).length; i++) {
           audio_files.push([`${i}`, root + data[i]["BG-Music"] + extension]);
         }
-
         load(audio_files, function () {
           loaded();
         });
