@@ -1,0 +1,33 @@
+1 - Level System
+    Level 0 is used for the main menu bgm and map "Mostly Ignored"
+2 - Music System
+    For the music just type the location of the audio file just like the way it'S 
+    done in the json file
+3 - Map System
+    Each level has a map array where each number represents a tile and the map is 19x22 
+    -Codes-
+    WALL = 0 // empty transparent tile that blocks movement of the player and enemies deprecated
+    BISCUIT = 1 // a small biscuit that gives 10 points
+    EMPTY = 2 // empty transparent tile that doesn't block movement of the player and enemies
+    BLOCK = 3 // deprecated
+    PILL = 4 // a big pill that gives 50 points and makes the enemies vulnerable for 10 seconds
+    HWALL = 5 // a horizontal wall
+    VWALL = 6 // a vertical wall
+    TLWALL = 7 // a top left corner wall
+    TRWALL = 8 // a top right corner wall
+    BLWALL = 9 // a bottom left corner wall
+    BRWALL = 10 // a bottom right corner wall
+    UCAP = 11 // the upper end of a vertical wall it's used to make the map look better and is completely optional
+    RCAP = 12 // the right end of a horizontal wall it's used to make the map look better and is completely optional
+    DCAP = 13 // the bottom end of a vertical wall it's used to make the map look better and is completely optional
+    LCAP = 14 // the left end of a horizontal wall it's used to make the map look better and is completely optional
+    UJUNC = 15 // a ⅄ junction with a wall on the top it's used to make the map look better and is completely optional
+    RJUNC = 16 // a >- junction with a wall on the right it's used to make the map look better and is completely optional
+    DJUNC = 17 // a Y junction with a wall on the bottom it's used to make the map look better and is completely optional
+    LJUNC = 18 // a -< junction with a wall on the left it's used to make the map look better and is completely optional
+
+4 - Ghost System
+    Each Object in the ghosts array represents a ghosts (there are as many ghosts as there are
+    objects in the array)
+
+    each object has to have an img attribute if left empty will use the default ghost renderer
