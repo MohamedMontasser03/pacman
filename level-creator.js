@@ -298,7 +298,7 @@ const RENDERER = {
         levelElement.classList.add("active");
       }
       levelElement.innerHTML = `
-      <span class="level__number">${index + 1}</span>
+      <span class="level__number">${index === 0 ? "Main Menu" : index}</span>
       <a class="level__delete">X</a>
       `;
       return levelElement;
