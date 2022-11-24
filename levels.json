@@ -1,5 +1,5 @@
-{
-  "0": {
+[
+  {
     "BG-Music": "assets/audio/bg-music/Kenny-Rogers-Gambler",
     "map": [
       [7, 5, 5, 5, 5, 5, 5, 5, 5, 17, 5, 5, 5, 5, 5, 5, 5, 5, 8],
@@ -27,7 +27,7 @@
     ],
     "ghosts": []
   },
-  "1": {
+  {
     "BG-Music": "assets/audio/bg-music/Gwen-Stefani-Rich-Girl",
     "map": [
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -63,7 +63,7 @@
       "img": "./assets/ghosts/1/thomson.gif"
     }
   },
-  "2": {
+  {
     "BG-Music": "assets/audio/bg-music/Wu-Tang-CREAM",
     "map": [
       [7, 5, 5, 5, 5, 5, 5, 5, 5, 1, 5, 5, 5, 5, 5, 5, 5, 5, 8],
@@ -102,7 +102,7 @@
       "img": "./assets/ghosts/2/weston jr.gif"
     }
   },
-  "3": {
+  {
     "BG-Music": "assets/audio/bg-music/Destinys-Child-bills-bills-bills",
     "map": [
       [7, 5, 5, 5, 5, 5, 5, 5, 5, 17, 5, 5, 5, 5, 5, 5, 5, 5, 8],
@@ -137,7 +137,7 @@
       }
     ]
   },
-  "4": {
+  {
     "BG-Music": "assets/audio/bg-music/Barrett-Strong-Money",
     "map": [
       [7, 5, 5, 5, 5, 5, 5, 5, 5, 17, 5, 5, 5, 5, 5, 5, 5, 5, 8],
@@ -172,7 +172,7 @@
       }
     ]
   },
-  "5": {
+  {
     "BG-Music": "assets/audio/bg-music/Madonna-Material-Girl",
     "map": [
       [7, 5, 5, 5, 5, 5, 5, 5, 5, 17, 5, 5, 5, 5, 5, 5, 5, 5, 8],
@@ -207,7 +207,7 @@
       }
     ]
   },
-  "6": {
+  {
     "BG-Music": "assets/audio/bg-music/Pink-Floyd-Money",
     "map": [
       [7, 5, 5, 5, 5, 5, 5, 5, 5, 17, 5, 5, 5, 5, 5, 5, 5, 5, 8],
@@ -242,7 +242,7 @@
       }
     ]
   },
-  "7": {
+  {
     "BG-Music": "assets/audio/bg-music/ABBA-Money",
     "map": [
       [7, 5, 5, 5, 5, 5, 5, 5, 5, 17, 5, 5, 5, 5, 5, 5, 5, 5, 8],
@@ -277,7 +277,7 @@
       }
     ]
   },
-  "8": {
+  {
     "BG-Music": "assets/audio/bg-music/ACDC-Money-Talks",
     "map": [
       [7, 5, 5, 5, 5, 5, 5, 5, 5, 17, 5, 5, 5, 5, 5, 5, 5, 5, 8],
@@ -312,7 +312,7 @@
       }
     ]
   },
-  "9": {
+  {
     "BG-Music": "assets/audio/bg-music/Donna-Summer-Hard-for-the-Money",
     "map": [
       [7, 5, 5, 5, 5, 5, 5, 5, 5, 17, 5, 5, 5, 5, 5, 5, 5, 5, 8],
@@ -347,7 +347,7 @@
       }
     ]
   },
-  "10": {
+  {
     "BG-Music": "assets/audio/bg-music/Kenny-Rogers-Gambler",
     "map": [
       [7, 5, 5, 5, 5, 5, 5, 5, 5, 17, 5, 5, 5, 5, 5, 5, 5, 5, 8],
@@ -382,4 +382,4 @@
       }
     ]
   }
-}
+]
