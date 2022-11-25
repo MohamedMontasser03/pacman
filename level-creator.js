@@ -33,6 +33,66 @@ const blockMap = [
   [16, 17],
   [18, 0],
 ];
+
+const wallInstructions = {
+  [Pacman.HWALL]: {
+    method: 0,
+    vars: [0, 0.5, 1, 0.5],
+  },
+  [Pacman.VWALL]: {
+    method: 0,
+    vars: [0.5, 0, 0.5, 1],
+  },
+  [Pacman.TLWALL]: {
+    method: 1,
+    vars: [1, 0.5, 0.5, 0.5, 0.5, 1],
+  },
+  [Pacman.TRWALL]: {
+    method: 1,
+    vars: [0, 0.5, 0.5, 0.5, 0.5, 1],
+  },
+  [Pacman.BLWALL]: {
+    method: 1,
+    vars: [1, 0.5, 0.5, 0.5, 0.5, 0],
+  },
+  [Pacman.BRWALL]: {
+    method: 1,
+    vars: [0, 0.5, 0.5, 0.5, 0.5, 0],
+  },
+  [Pacman.UCAP]: {
+    method: 0,
+    vars: [0.5, 1, 0.5, 0.5],
+  },
+  [Pacman.DCAP]: {
+    method: 0,
+    vars: [0.5, 0, 0.5, 0.5],
+  },
+  [Pacman.LCAP]: {
+    method: 0,
+    vars: [1, 0.5, 0.5, 0.5],
+  },
+  [Pacman.RCAP]: {
+    method: 0,
+    vars: [0, 0.5, 0.5, 0.5],
+  },
+  [Pacman.UJUNC]: {
+    method: 2,
+    vars: [Pacman.BRWALL, Pacman.BLWALL],
+  },
+  [Pacman.DJUNC]: {
+    method: 2,
+    vars: [Pacman.TRWALL, Pacman.TLWALL],
+  },
+  [Pacman.LJUNC]: {
+    method: 2,
+    vars: [Pacman.TRWALL, Pacman.BRWALL],
+  },
+  [Pacman.RJUNC]: {
+    method: 2,
+    vars: [Pacman.TLWALL, Pacman.BLWALL],
+  },
+};
+
 const RENDERER = {
   components: {
     levelsList: document.getElementById("levels-list"),
@@ -40,143 +100,42 @@ const RENDERER = {
     levelEditorCanvas: document.getElementById("pacman-canvas"),
     blockEditorCanvas: document.getElementById("block-canvas"),
   },
+  drawWallBlock(ctx, y, x, block, map) {
+    if (!wallInstructions[map[y][x]]) return;
+    const { method, vars } = wallInstructions[block];
+    if (method === 0) {
+      const [x0, y0, x1, y1] = vars;
+      ctx.moveTo((x + x0) * blockSize, (y + y0) * blockSize);
+      ctx.lineTo((x + x1) * blockSize, (y + y1) * blockSize);
+    } else if (method === 1) {
+      const [x0, y0, x1, y1, x2, y2] = vars;
+      ctx.moveTo((x + x0) * blockSize, (y + y0) * blockSize);
+      ctx.quadraticCurveTo(
+        (x + x1) * blockSize,
+        (y + y1) * blockSize,
+        (x + x2) * blockSize,
+        (y + y2) * blockSize
+      );
+    } else if (method === 2) {
+      vars.map((newBlock) => {
+        this.drawWallBlock(ctx, y, x, newBlock, map);
+      });
+    }
+  },
   drawWall(ctx, map) {
-    var i, j, p, line;
+    var i, j;
+    const height = map.length;
+    const width = map[0].length;
 
     ctx.strokeStyle = "#0000FF";
     ctx.lineWidth = 5;
     ctx.lineCap = "round";
-    const width = map[0].length;
-    const height = map.length;
 
     ctx.beginPath();
 
     for (i = 0; i < height; i += 1) {
       for (j = 0; j < width; j += 1) {
-        if (map[i][j] === Pacman.HWALL) {
-          ctx.moveTo(j * blockSize, (i + 0.5) * blockSize);
-          ctx.lineTo((j + 1) * blockSize, (i + 0.5) * blockSize);
-        }
-        if (map[i][j] === Pacman.VWALL) {
-          ctx.moveTo((j + 0.5) * blockSize, i * blockSize);
-          ctx.lineTo((j + 0.5) * blockSize, (i + 1) * blockSize);
-        }
-        if (map[i][j] === Pacman.TLWALL) {
-          ctx.moveTo((j + 1) * blockSize, (i + 0.5) * blockSize);
-          ctx.quadraticCurveTo(
-            (j + 0.5) * blockSize,
-            (i + 0.5) * blockSize,
-            (j + 0.5) * blockSize,
-            (i + 1) * blockSize
-          );
-        }
-        if (map[i][j] === Pacman.TRWALL) {
-          ctx.moveTo(j * blockSize, (i + 0.5) * blockSize);
-          ctx.quadraticCurveTo(
-            (j + 0.5) * blockSize,
-            (i + 0.5) * blockSize,
-            (j + 0.5) * blockSize,
-            (i + 1) * blockSize
-          );
-        }
-        if (map[i][j] === Pacman.BLWALL) {
-          ctx.moveTo((j + 1) * blockSize, (i + 0.5) * blockSize);
-          ctx.quadraticCurveTo(
-            (j + 0.5) * blockSize,
-            (i + 0.5) * blockSize,
-            (j + 0.5) * blockSize,
-            i * blockSize
-          );
-        }
-        if (map[i][j] === Pacman.BRWALL) {
-          ctx.moveTo(j * blockSize, (i + 0.5) * blockSize);
-          ctx.quadraticCurveTo(
-            (j + 0.5) * blockSize,
-            (i + 0.5) * blockSize,
-            (j + 0.5) * blockSize,
-            i * blockSize
-          );
-        }
-        if (map[i][j] === Pacman.DCAP) {
-          ctx.moveTo((j + 0.5) * blockSize, i * blockSize);
-          ctx.lineTo((j + 0.5) * blockSize, (i + 0.5) * blockSize);
-        }
-        if (map[i][j] === Pacman.UCAP) {
-          ctx.moveTo((j + 0.5) * blockSize, (i + 1) * blockSize);
-          ctx.lineTo((j + 0.5) * blockSize, (i + 0.5) * blockSize);
-        }
-        if (map[i][j] === Pacman.LCAP) {
-          ctx.moveTo((j + 1) * blockSize, (i + 0.5) * blockSize);
-          ctx.lineTo((j + 0.5) * blockSize, (i + 0.5) * blockSize);
-        }
-        if (map[i][j] === Pacman.RCAP) {
-          ctx.moveTo(j * blockSize, (i + 0.5) * blockSize);
-          ctx.lineTo((j + 0.5) * blockSize, (i + 0.5) * blockSize);
-        }
-        if (map[i][j] === Pacman.RJUNC) {
-          ctx.moveTo((j + 1) * blockSize, (i + 0.5) * blockSize);
-          ctx.quadraticCurveTo(
-            (j + 0.5) * blockSize,
-            (i + 0.5) * blockSize,
-            (j + 0.5) * blockSize,
-            (i + 1) * blockSize
-          );
-          ctx.moveTo((j + 1) * blockSize, (i + 0.5) * blockSize);
-          ctx.quadraticCurveTo(
-            (j + 0.5) * blockSize,
-            (i + 0.5) * blockSize,
-            (j + 0.5) * blockSize,
-            i * blockSize
-          );
-        }
-        if (map[i][j] === Pacman.LJUNC) {
-          ctx.moveTo(j * blockSize, (i + 0.5) * blockSize);
-          ctx.quadraticCurveTo(
-            (j + 0.5) * blockSize,
-            (i + 0.5) * blockSize,
-            (j + 0.5) * blockSize,
-            (i + 1) * blockSize
-          );
-          ctx.moveTo(j * blockSize, (i + 0.5) * blockSize);
-          ctx.quadraticCurveTo(
-            (j + 0.5) * blockSize,
-            (i + 0.5) * blockSize,
-            (j + 0.5) * blockSize,
-            i * blockSize
-          );
-        }
-        if (map[i][j] === Pacman.UJUNC) {
-          ctx.moveTo((j + 1) * blockSize, (i + 0.5) * blockSize);
-          ctx.quadraticCurveTo(
-            (j + 0.5) * blockSize,
-            (i + 0.5) * blockSize,
-            (j + 0.5) * blockSize,
-            i * blockSize
-          );
-          ctx.moveTo(j * blockSize, (i + 0.5) * blockSize);
-          ctx.quadraticCurveTo(
-            (j + 0.5) * blockSize,
-            (i + 0.5) * blockSize,
-            (j + 0.5) * blockSize,
-            i * blockSize
-          );
-        }
-        if (map[i][j] === Pacman.DJUNC) {
-          ctx.moveTo((j + 1) * blockSize, (i + 0.5) * blockSize);
-          ctx.quadraticCurveTo(
-            (j + 0.5) * blockSize,
-            (i + 0.5) * blockSize,
-            (j + 0.5) * blockSize,
-            (i + 1) * blockSize
-          );
-          ctx.moveTo(j * blockSize, (i + 0.5) * blockSize);
-          ctx.quadraticCurveTo(
-            (j + 0.5) * blockSize,
-            (i + 0.5) * blockSize,
-            (j + 0.5) * blockSize,
-            (i + 1) * blockSize
-          );
-        }
+        this.drawWallBlock(ctx, i, j, map[i][j], map);
       }
     }
     ctx.stroke();
