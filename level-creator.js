@@ -227,10 +227,10 @@ const RENDERER = {
     ctx.strokeStyle = "#FFF";
     ctx.lineWidth = 2;
     ctx.strokeRect(
-      (curBlock % 2) * blockSize,
-      Math.floor(curBlock / 2) * blockSize,
-      blockSize,
-      blockSize
+      (curBlock % 2) * blockSize + 1,
+      Math.floor(curBlock / 2) * blockSize + 1,
+      blockSize - 2,
+      blockSize - 2
     );
     ctx.closePath();
   },
@@ -386,9 +386,15 @@ const APP = {
       }
 
       canvas.getContext("2d").strokeStyle = "red";
+      // aviod drawing outside the block
       canvas
         .getContext("2d")
-        .strokeRect(x * blockSize, y * blockSize, blockSize, blockSize);
+        .strokeRect(
+          x * blockSize + 1,
+          y * blockSize + 1,
+          blockSize - 2,
+          blockSize - 2
+        );
     });
     this.components.levelEditorCanvas.addEventListener(
       "mouseleave",
@@ -420,7 +426,12 @@ const APP = {
       canvas.getContext("2d").strokeStyle = "red";
       canvas
         .getContext("2d")
-        .strokeRect(x * blockSize, y * blockSize, blockSize, blockSize);
+        .strokeRect(
+          x * blockSize + 1,
+          y * blockSize + 1,
+          blockSize - 2,
+          blockSize - 2
+        );
     });
     this.components.blockEditorCanvas.addEventListener(
       "mouseleave",
