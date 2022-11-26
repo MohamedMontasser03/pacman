@@ -200,6 +200,94 @@ const RENDERER = {
     }
     ctx.closePath();
   },
+  drawGhost(ctx, x, y) {
+    var s = blockSize,
+      top = (y / 10) * s,
+      left = (x / 10) * s;
+
+    var tl = left + s;
+    var base = top + s - 3;
+    var inc = s / 10;
+
+    var high = -3;
+    var low = 3;
+
+    ctx.fillStyle = "#FFFFFF55";
+    ctx.beginPath();
+
+    ctx.moveTo(left, base);
+
+    ctx.quadraticCurveTo(left, top, left + s / 2, top);
+    ctx.quadraticCurveTo(left + s, top, left + s, base);
+
+    // Wavy things at the bottom
+    ctx.quadraticCurveTo(tl - inc * 1, base + high, tl - inc * 2, base);
+    ctx.quadraticCurveTo(tl - inc * 3, base + low, tl - inc * 4, base);
+    ctx.quadraticCurveTo(tl - inc * 5, base + high, tl - inc * 6, base);
+    ctx.quadraticCurveTo(tl - inc * 7, base + low, tl - inc * 8, base);
+    ctx.quadraticCurveTo(tl - inc * 9, base + high, tl - inc * 10, base);
+
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.fillStyle = "#FFF";
+    ctx.arc(left + blockSize / 3, top + blockSize / 3, s / 6, 0, 300, false);
+    ctx.arc(
+      left + s - blockSize / 3,
+      top + blockSize / 3,
+      s / 6,
+      0,
+      300,
+      false
+    );
+    ctx.closePath();
+    ctx.fill();
+
+    var f = s / 12;
+
+    ctx.beginPath();
+    ctx.fillStyle = "#000";
+    ctx.arc(
+      left + blockSize / 3 + -f,
+      top + blockSize / 3,
+      s / 15,
+      0,
+      300,
+      false
+    );
+    ctx.arc(
+      left + s - blockSize / 3 + -f,
+      top + blockSize / 3,
+      s / 15,
+      0,
+      300,
+      false
+    );
+    ctx.closePath();
+    ctx.fill();
+  },
+  drawPlayer(ctx, x, y) {
+    let s = blockSize,
+      angle = { start: 0.75, end: 1.25, direction: true };
+
+    ctx.fillStyle = "#FFFF0055";
+
+    ctx.beginPath();
+
+    ctx.moveTo((x / 10) * s + s / 2, (y / 10) * s + s / 2);
+
+    ctx.arc(
+      (x / 10) * s + s / 2,
+      (y / 10) * s + s / 2,
+      s / 2,
+      Math.PI * angle.start,
+      Math.PI * angle.end,
+      angle.direction
+    );
+
+    ctx.fill();
+  },
   drawMap(ctx, map) {
     var i,
       j,
@@ -219,6 +307,12 @@ const RENDERER = {
       }
     }
   },
+  renderMainMap(ctx, map) {
+    this.drawMap(ctx, map);
+    // render player start position
+    this.drawPlayer(ctx, 90, 120);
+    this.drawGhost(ctx, 90, 80);
+  },
   renderCurBlock(curBlock) {
     const ctx = this.components.blockEditorCanvas.getContext("2d");
     this.drawMap(ctx, blockMap);
@@ -237,12 +331,11 @@ const RENDERER = {
   renderLevelControls(levelState, curLevel, curBlock) {
     if (curLevel === -1) {
       this.components.levelEditor.style.setProperty("display", "none");
-      console.log("hide level editor", this.components.levelEditor);
       return;
     } else {
       this.components.levelEditor.style.display = "block";
     }
-    this.drawMap(
+    this.renderMainMap(
       this.components.levelEditorCanvas.getContext("2d"),
       levelState[curLevel].map
     );
@@ -296,6 +389,7 @@ const APP = {
       this.components.levelsList.children[this.curLevel].classList.remove(
         "active"
       );
+    this.components.levelsList?.children[curLevel]?.classList.add("active");
     this.curLevel = curLevel;
     RENDERER.renderLevelControls(this.levelState, this.curLevel, this.curBlock);
   },
@@ -379,7 +473,7 @@ const APP = {
       const x = Math.floor(event.offsetX / blockSize);
       const y = Math.floor(event.offsetY / blockSize);
       const map = this.levelState[this.curLevel].map;
-      RENDERER.drawMap(canvas.getContext("2d"), map);
+      RENDERER.renderMainMap(canvas.getContext("2d"), map);
 
       if (event.buttons === 1) {
         map[y][x] = this.curBlock;
@@ -402,7 +496,7 @@ const APP = {
         if (this.curLevel === -1) return;
         const canvas = this.components.levelEditorCanvas;
         const map = this.levelState[this.curLevel].map;
-        RENDERER.drawMap(canvas.getContext("2d"), map);
+        RENDERER.renderMainMap(canvas.getContext("2d"), map);
       }
     );
     this.components.levelEditorCanvas.addEventListener("click", (event) => {
