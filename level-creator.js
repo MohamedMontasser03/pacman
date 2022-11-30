@@ -93,6 +93,9 @@ const wallInstructions = {
   },
 };
 
+const dolImg = new Image();
+dolImg.src = "./assets/thumb_dollarsgrid.png";
+
 const RENDERER = {
   components: {
     levelsList: document.getElementById("levels-list"),
@@ -141,31 +144,28 @@ const RENDERER = {
     ctx.stroke();
   },
   drawPills(ctx, map) {
-    let pillSize = 0.2;
-    if (++pillSize > 30) {
-      pillSize = 0;
-    }
-    const width = map[0].length;
+    const pillSize = 0;
+    const offsetX = pillSize % 8;
+    const offsetY = Math.floor(pillSize / 8);
     const height = map.length;
-
+    const width = map[0].length;
     for (i = 0; i < height; i += 1) {
       for (j = 0; j < width; j += 1) {
         if (map[i][j] === Pacman.PILL) {
           ctx.beginPath();
 
-          ctx.fillStyle = "#000";
-          ctx.fillRect(j * blockSize, i * blockSize, blockSize, blockSize);
-
-          ctx.fillStyle = "#FFF";
-          ctx.arc(
-            j * blockSize + blockSize / 2,
-            i * blockSize + blockSize / 2,
-            Math.abs(5 - pillSize / 3),
-            0,
-            Math.PI * 2,
-            false
+          // load image from data url and draw it
+          ctx.drawImage(
+            dolImg,
+            32 * offsetX,
+            32 * offsetY,
+            32,
+            32,
+            j * blockSize,
+            i * blockSize,
+            blockSize,
+            blockSize
           );
-          ctx.fill();
           ctx.closePath();
         }
       }

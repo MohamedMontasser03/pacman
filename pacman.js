@@ -841,28 +841,33 @@ Pacman.Map = function (size) {
   }
 
   function drawPills(ctx) {
-    if (++pillSize > 30) {
+    var img = new Image();
+    img.src = "./assets/thumb_dollarsgrid.png";
+    if (++pillSize > 24) {
       pillSize = 0;
     }
-
+    const offsetX = pillSize % 8;
+    const offsetY = Math.floor(pillSize / 8);
     for (i = 0; i < height; i += 1) {
       for (j = 0; j < width; j += 1) {
         if (map[i][j] === Pacman.PILL) {
           ctx.beginPath();
-
-          ctx.fillStyle = "#000";
+          // draw black box
+          ctx.fillStyle = "#000000";
           ctx.fillRect(j * blockSize, i * blockSize, blockSize, blockSize);
 
-          ctx.fillStyle = "#FFF";
-          ctx.arc(
-            j * blockSize + blockSize / 2,
-            i * blockSize + blockSize / 2,
-            Math.abs(5 - pillSize / 3),
-            0,
-            Math.PI * 2,
-            false
+          // load image from data url and draw it
+          ctx.drawImage(
+            img,
+            32 * offsetX,
+            32 * offsetY,
+            32,
+            32,
+            j * blockSize,
+            i * blockSize,
+            blockSize,
+            blockSize
           );
-          ctx.fill();
           ctx.closePath();
         }
       }
