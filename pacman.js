@@ -843,11 +843,13 @@ Pacman.Map = function (size) {
   function drawPills(ctx) {
     var img = new Image();
     img.src = "./assets/thumb_dollarsgrid.png";
-    if (++pillSize > 24) {
+    const multi = 3;
+    const curFrame = Math.floor(++pillSize / multi); 
+    if (curFrame > 24) {
       pillSize = 0;
     }
-    const offsetX = pillSize % 8;
-    const offsetY = Math.floor(pillSize / 8);
+    const offsetX = curFrame % 8;
+    const offsetY = Math.floor(curFrame / 8);
     for (i = 0; i < height; i += 1) {
       for (j = 0; j < width; j += 1) {
         if (map[i][j] === Pacman.PILL) {
