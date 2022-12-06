@@ -845,7 +845,7 @@ Pacman.Map = function (size) {
     img.src = "./assets/thumb_dollarsgrid.png";
     const multi = 3;
     const curFrame = Math.floor(++pillSize / multi); 
-    if (curFrame > 23) {
+    if (curFrame >= 23) {
       pillSize = 0;
     }
     const offsetX = curFrame % 8;
