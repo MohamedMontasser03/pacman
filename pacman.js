@@ -116,7 +116,8 @@ Pacman.Ghost = function (game, map, colour, img) {
     eatable = null,
     eaten = null,
     due = null,
-    sprite = null;
+    sprite = null,
+    rngAtts = 0;
 
   function getNewCoord(dir, current) {
     var speed = isVunerable() ? 1 : isHidden() ? 4 : 2,
@@ -156,8 +157,9 @@ Pacman.Ghost = function (game, map, colour, img) {
   }
 
   function getRandomDirection() {
-    const dirs = [UP, DOWN, LEFT, RIGHT];
-    return dirs[Math.floor(Math.random() * dirs.length)];
+    var moves =
+      direction === LEFT || direction === RIGHT ? [UP, DOWN] : [LEFT, RIGHT];
+    return moves[Math.floor(Math.random() * 2)];
   }
 
   function reset() {
@@ -387,27 +389,30 @@ Pacman.Ghost = function (game, map, colour, img) {
         x: pointToCoord(nextSquare(npos.x, direction)),
       })
     ) {
-      const fDirection = [];
-      while (fDirection.length < 4) {
-        due = getRandomDirection();
-        if (fDirection.includes(due)) continue;
-        npos = getNewCoord(due, position);
-        if (
-          map.isWallSpace({
-            y: pointToCoord(nextSquare(npos.y, due)),
-            x: pointToCoord(nextSquare(npos.x, due)),
-          })
-        ) {
-          fDirection.push(due);
-        } else {
-          break;
-        }
+      due = getRandomDirection();
+      if (
+        map.isWallSpace({
+          y: pointToCoord(nextSquare(npos.y, due)),
+          x: pointToCoord(nextSquare(npos.x, due)),
+        }) &&
+        map.isWallSpace({
+          y: pointToCoord(nextSquare(npos.y, oppositeDirection(due))),
+          x: pointToCoord(nextSquare(npos.x, oppositeDirection(due))),
+        })
+      ) {
+        due = oppositeDirection(direction);
       }
-      if (fDirection.length === 4) {
+
+      const maxAttempts = 10;
+      if (rngAtts > maxAttempts) {
+        rngAtts = 0;
         return {
           new: oldPos,
           old: oldPos,
         };
+      } else {
+        rngAtts++;
+        return move(ctx);
       }
     }
 
@@ -420,6 +425,7 @@ Pacman.Ghost = function (game, map, colour, img) {
 
     due = getRandomDirection();
 
+    rngAtts = 0;
     return {
       new: position,
       old: oldPos,
