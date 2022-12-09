@@ -156,9 +156,8 @@ Pacman.Ghost = function (game, map, colour, img) {
   }
 
   function getRandomDirection() {
-    var moves =
-      direction === LEFT || direction === RIGHT ? [UP, DOWN] : [LEFT, RIGHT];
-    return moves[Math.floor(Math.random() * 2)];
+    const dirs = [UP, DOWN, LEFT, RIGHT];
+    return dirs[Math.floor(Math.random() * dirs.length)];
   }
 
   function reset() {
@@ -388,20 +387,28 @@ Pacman.Ghost = function (game, map, colour, img) {
         x: pointToCoord(nextSquare(npos.x, direction)),
       })
     ) {
-      due = getRandomDirection();
-      if (
-        map.isWallSpace({
-          y: pointToCoord(nextSquare(npos.y, due)),
-          x: pointToCoord(nextSquare(npos.x, due)),
-        }) &&
-        map.isWallSpace({
-          y: pointToCoord(nextSquare(npos.y, oppositeDirection(due))),
-          x: pointToCoord(nextSquare(npos.x, oppositeDirection(due))),
-        })
-      ) {
-        due = oppositeDirection(direction);
+      const fDirection = [];
+      while (fDirection.length < 4) {
+        due = getRandomDirection();
+        if (fDirection.includes(due)) continue;
+        npos = getNewCoord(due, position);
+        if (
+          map.isWallSpace({
+            y: pointToCoord(nextSquare(npos.y, due)),
+            x: pointToCoord(nextSquare(npos.x, due)),
+          })
+        ) {
+          fDirection.push(due);
+        } else {
+          break;
+        }
       }
-      return move(ctx);
+      if (fDirection.length === 4) {
+        return {
+          new: oldPos,
+          old: oldPos,
+        };
+      }
     }
 
     position = npos;
