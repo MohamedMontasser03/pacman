@@ -1084,7 +1084,7 @@ var PACMAN = (function () {
 
   function drawScore(text, position) {
     ctx.fillStyle = "#FFFFFF";
-    ctx.font = "12px BDCartoonShoutRegular";
+    ctx.font = "12px TomatoGroteskRegular";
     ctx.fillText(
       text,
       (position["new"]["x"] / 10) * map.blockSize,
@@ -1094,7 +1094,7 @@ var PACMAN = (function () {
 
   function dialog(text) {
     ctx.fillStyle = "#FFFF00";
-    ctx.font = `${0.8 * blockSize}px BDCartoonShoutRegular`;
+    ctx.font = `${0.8 * blockSize}px TomatoGroteskRegular`;
     var width = ctx.measureText(text).width,
       x = (map.width * map.blockSize - width) / 2;
     ctx.fillText(text, x, blockSize * 13);
@@ -1206,11 +1206,15 @@ var PACMAN = (function () {
 
     ctx.fillStyle = !soundDisabled() ? "#00FF00" : "#FF0000";
     ctx.font = `bold ${0.9 * blockSize}px sans-serif`;
-    //ctx.fillText("♪", 10, textBase);
-    ctx.fillText("s", 10, textBase);
+    const soundImg = new Image();
+    soundImg.src = !soundDisabled()
+      ? "./assets/Speaker_Icon.png"
+      : "./assets/Mute_Icon.png";
+    // do color filter to image to make it red or green
+    ctx.drawImage(soundImg, 10, textBase - 20, 20, 20);
 
     ctx.fillStyle = "#FFFF00";
-    ctx.font = `${0.8 * blockSize}px BDCartoonShoutRegular`;
+    ctx.font = `${0.8 * blockSize}px TomatoGroteskRegular`;
     ctx.fillText("Score: " + user.theScore(), blockSize * 1.67, textBase);
     ctx.fillText("Level: " + level, 14.5 * blockSize, textBase);
   }
@@ -1311,7 +1315,7 @@ var PACMAN = (function () {
       diff = 5 + Math.floor((timerStart - tick) / Pacman.FPS);
 
       if (diff === 0) {
-        if (levelData[level].box && !died) {
+        if (levelData[level].card && !died) {
           setState(BOX);
         } else {
           died = false;
@@ -1398,18 +1402,10 @@ var PACMAN = (function () {
         box = document.createElement("div");
         box.classList.add("text-box");
 
-        ///////
-        let para = document.createElement("p");
-        para.classList.add("para");
-        para.innerText = "0";
-
-        let img = document.createElement("img");
-        img.classList.add("box-img");
-        img.src = "";
-        ///////
+        var img = document.createElement("img");
+        img.classList.add("card-img");
 
         box.appendChild(img);
-        box.appendChild(para);
         wrapper.appendChild(box);
 
         wrapper.appendChild(canvas);
@@ -1501,9 +1497,9 @@ var PACMAN = (function () {
   }
 
   function handleTextBox() {
-    box.children[1].textContent =
-      levelData[level].box.msg + "\n\n\t\t Press N to start the game";
-    box.children[0].src = levelData[level].box.img;
+    const isMobile = matchMedia("(max-width: 480px)").matches;
+    box.children[0].src =
+      levelData[level].card[isMobile ? "vertical" : "horizontal"];
     box.style.removeProperty("display");
   }
 

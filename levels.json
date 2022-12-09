@@ -58,9 +58,9 @@
         "img": "./assets/ghosts/1/ghost.png"
       }
     ],
-    "box": {
-      "msg": "David Thomson\nNet Worth: $52.9 billion\nMajor stakeholder of Thomson Reuters media company\nOffence: Selling tech to ICE to help spy on/ deport migrants\nStrengths: Grandaddy’s money\nWeakness: Willing to drop $70 million on a Baroque painting",
-      "img": "./assets/ghosts/1/thomson.gif"
+    "card": {
+      "vertical": "./assets/cards/1-v.png",
+      "horizontal": "./assets/cards/1-h.png"
     }
   },
   {

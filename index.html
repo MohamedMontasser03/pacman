@@ -7,8 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style type="text/css">
     @font-face {
-      font-family: 'BDCartoonShoutRegular';
-      src: url('BD_Cartoon_Shout-webfont.ttf') format('truetype');
+      font-family: 'TomatoGroteskRegular';
+      src: url('TomatoGrotesk-Black.otf') format('opentype');
       font-weight: normal;
       font-style: normal;
     }
@@ -21,13 +21,13 @@
     }
 
     #shim {
-      font-family: BDCartoonShoutRegular;
+      font-family: 'TomatoGroteskRegular';
       position: absolute;
       visibility: hidden
     }
 
     h1 {
-      font-family: BDCartoonShoutRegular;
+      font-family: 'TomatoGroteskRegular';
       text-align: center;
     }
 
@@ -42,11 +42,8 @@
     }
 
     .text-box {
-      font-family: BDCartoonShoutRegular;
+      font-family: 'TomatoGroteskRegular';
       background-color: black;
-      padding: 1rem 2rem;
-      border: 0.4rem solid blue;
-      border-radius: 15px;
       box-sizing: border-box;
       position: absolute;
       min-width: 120%;
@@ -55,19 +52,28 @@
       transform: translate(-50%, -50%);
       display: flex;
       align-items: center;
-      gap: 2rem;
-      line-height: 2rem;
+
+      /* Border Code */
+      padding: 1rem 2rem;
+      border: 0.4rem solid blue;
+      border-radius: 15px;
     }
 
-    .para {
-      color: yellow;
-      padding: 0;
-      margin: 0;
-      white-space: pre-line;
-    }
+    @media screen and (max-width: 480px) {
+      body {
+        width: 100%;
+      }
 
-    .box-img {
-      height: 10rem;
+      .text-box {
+        min-width: 0;
+        width: 100%;
+        left: 0;
+        transform: translate(0, -50%);
+      }
+
+      .card-img {
+        width: 100%;
+      }
     }
   </style>
 </head>
