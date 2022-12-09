@@ -313,7 +313,7 @@ const RENDERER = {
       for (i = 0; i < height; i += 1) {
         for (j = 0; j < width; j += 1) {
           ctx.beginPath();
-          ctx.strokeStyle = "#FFF";
+          ctx.strokeStyle = "#999999";
           ctx.lineWidth = 2;
           ctx.strokeRect(
             j * blockSize + 1,
