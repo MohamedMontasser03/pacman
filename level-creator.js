@@ -288,7 +288,7 @@ const RENDERER = {
 
     ctx.fill();
   },
-  drawMap(ctx, map) {
+  drawMap(ctx, map, options) {
     var i,
       j,
       size = blockSize;
@@ -306,6 +306,31 @@ const RENDERER = {
         this.drawBlock(i, j, ctx, map);
       }
     }
+
+    if (options?.drawPadding) {
+      ctx.fillStyle = "#000";
+      // create padding around each block
+      for (i = 0; i < height; i += 1) {
+        for (j = 0; j < width; j += 1) {
+          ctx.beginPath();
+          ctx.strokeStyle = "#FFF";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(
+            j * blockSize + 1,
+            i * blockSize + 1,
+            blockSize - 2,
+            blockSize - 2
+          );
+          ctx.closePath();
+        }
+      }
+      // create padding around the whole map
+      ctx.beginPath();
+      ctx.strokeStyle = "#FFF";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(1, 1, width * blockSize - 1, height * blockSize - 1);
+      ctx.closePath();
+    }
   },
   renderMainMap(ctx, map) {
     this.drawMap(ctx, map);
@@ -315,7 +340,9 @@ const RENDERER = {
   },
   renderCurBlock(curBlock) {
     const ctx = this.components.blockEditorCanvas.getContext("2d");
-    this.drawMap(ctx, blockMap);
+    this.drawMap(ctx, blockMap, {
+      drawPadding: true,
+    });
     // draw box around current block
     ctx.beginPath();
     ctx.strokeStyle = "#FFF";
@@ -507,7 +534,7 @@ const APP = {
       const map = this.levelState[this.curLevel].map;
       console.log(map[y][x], x, y);
       this.levelState[this.curLevel].map[y][x] = this.curBlock;
-      RENDERER.drawMap(canvas.getContext("2d"), map);
+      RENDERER.renderMainMap(canvas.getContext("2d"), map);
     });
     this.components.blockEditorCanvas.addEventListener("mousemove", (event) => {
       if (this.curLevel === -1) return;
