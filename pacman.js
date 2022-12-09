@@ -844,7 +844,7 @@ Pacman.Map = function (size) {
     var img = new Image();
     img.src = "./assets/thumb_dollarsgrid.png";
     const multi = 3;
-    const curFrame = Math.floor(++pillSize / multi); 
+    const curFrame = Math.floor(++pillSize / multi);
     if (curFrame >= 23) {
       pillSize = 0;
     }
@@ -980,50 +980,45 @@ Pacman.Audio = function (game) {
     }
   }
 
-  function disableSound() {
+  function toggleSound() {
+    // mute all sounds
     for (var i = 0; i < playing.length; i++) {
-      files[playing[i]].pause();
-      files[playing[i]].currentTime = 0;
+      files[playing[i]].volume = !game.soundDisabled() ? 0 : 1;
     }
-    pauseBG();
-    playing = [];
+    if (bgPlaying) bgPlaying.volume = !game.soundDisabled() ? 0 : 1;
   }
 
   function ended(name) {
     var i,
-      tmp = [],
       found = false;
 
     files[name].removeEventListener("ended", endEvents[name], true);
 
     for (i = 0; i < playing.length; i++) {
-      if (!found && playing[i]) {
+      if (playing[i] === name) {
+        playing.splice(i, 1);
         found = true;
-      } else {
-        tmp.push(playing[i]);
+        break;
       }
     }
-    playing = tmp;
   }
 
   function play(name) {
-    if (!game.soundDisabled()) {
-      endEvents[name] = function () {
-        ended(name);
-      };
-      playing.push(name);
-      files[name].addEventListener("ended", endEvents[name], true);
-      files[name].play();
-    }
+    endEvents[name] = function () {
+      ended(name);
+    };
+    playing.push(name);
+    files[name].addEventListener("ended", endEvents[name], true);
+    files[name].volume = !game.soundDisabled() ? 1 : 0;
+    files[name].play();
   }
 
   function playBG(name) {
     bgPlaying = files[name];
-    if (!game.soundDisabled()) {
-      bgPlaying.play().catch((err) => {
-        console.log("Failed to AutoPlay BG audio");
-      });
-    }
+    bgPlaying.volume = !game.soundDisabled() ? 1 : 0;
+    bgPlaying.play().catch((err) => {
+      console.log("Failed to AutoPlay BG audio");
+    });
   }
 
   function pauseBG() {
@@ -1046,7 +1041,7 @@ Pacman.Audio = function (game) {
   }
 
   return {
-    disableSound: disableSound,
+    toggleSound: toggleSound,
     load: load,
     play: play,
     pause: pause,
@@ -1134,7 +1129,7 @@ var PACMAN = (function () {
         setState(PLAYING);
       }
     } else if (e.keyCode === KEY.S) {
-      audio.disableSound();
+      audio.toggleSound();
       localStorage["soundDisabled"] = !soundDisabled();
     } else if (e.keyCode === KEY.P && state === PAUSE) {
       audio.resume();
@@ -1510,7 +1505,7 @@ var PACMAN = (function () {
       e.x - offsetX < blockSize &&
       e.y - offsetY - mapHeight * blockSize + window.scrollY > 0
     ) {
-      audio.disableSound();
+      audio.toggleSound();
       localStorage["soundDisabled"] = !soundDisabled();
       return;
     }
