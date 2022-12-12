@@ -8,7 +8,7 @@
  * do proper ghost mechanics (blinky/wimpy etc)
  */
 
-let dev = false;
+let dev = true;
 const mapWidth = 19,
   mapHeight = 22,
   blockSize = 32,
@@ -28,7 +28,7 @@ var NONE = 4,
   BOX = 12,
   Pacman = {};
 
-Pacman.FPS = 30;
+Pacman.FPS = 1000;
 
 Pacman.WALL = 0;
 Pacman.BISCUIT = 1;
@@ -157,9 +157,8 @@ Pacman.Ghost = function (game, map, colour, img) {
   }
 
   function getRandomDirection() {
-    var moves =
-      direction === LEFT || direction === RIGHT ? [UP, DOWN] : [LEFT, RIGHT];
-    return moves[Math.floor(Math.random() * 2)];
+    var dirs = [UP, DOWN, LEFT, RIGHT];
+    return dirs[Math.floor(Math.random() * dirs.length)];
   }
 
   function reset() {
@@ -260,7 +259,7 @@ Pacman.Ghost = function (game, map, colour, img) {
       [DOWN]: 3,
     };
 
-    if (sprite) {
+    if (sprite && img) {
       var dy = eaten ? blockSize * 2 : 0;
 
       ctx.drawImage(
