@@ -14,6 +14,8 @@ const mapWidth = 19,
   blockSize = 32,
   footerHeight = 12 + blockSize;
 
+const isMobile = matchMedia("(max-width: 480px)").matches;
+
 var NONE = 4,
   UP = 3,
   LEFT = 2,
@@ -1300,7 +1302,7 @@ var PACMAN = (function () {
     } else if (state === WAITING && stateChanged) {
       stateChanged = false;
       map.draw(ctx);
-      dialog("Press N to start a New game");
+      dialog(`${isMobile ? "Tap" : "Press N"} to start a New game`);
       console.log("Initail Render Of main menu");
     } else if (state === BOX && stateChanged) {
       stateChanged = false;
@@ -1506,7 +1508,6 @@ var PACMAN = (function () {
   }
 
   function handleTextBox() {
-    const isMobile = matchMedia("(max-width: 480px)").matches;
     box.children[0].src =
       levelData[level].card[isMobile ? "vertical" : "horizontal"];
     box.style.removeProperty("display");
