@@ -8,7 +8,7 @@
  * do proper ghost mechanics (blinky/wimpy etc)
  */
 
-let dev = true;
+let dev = false;
 const mapWidth = 19,
   mapHeight = 22,
   blockSize = 32,
@@ -30,7 +30,7 @@ var NONE = 4,
   BOX = 12,
   Pacman = {};
 
-Pacman.FPS = 1000;
+Pacman.FPS = 60;
 
 Pacman.WALL = 0;
 Pacman.BISCUIT = 1;
