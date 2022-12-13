@@ -1527,6 +1527,7 @@ var PACMAN = (function () {
   }
 
   function handleTextBox() {
+    box.children[0].src = "";
     box.children[0].src =
       level < levelData.length
         ? levelData[level].card[isMobile ? "vertical" : "horizontal"]
