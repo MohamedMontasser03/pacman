@@ -1140,7 +1140,16 @@ var PACMAN = (function () {
         startNewGame();
       } else if (state === BOX) {
         box.style.setProperty("display", "none");
-        setState(PLAYING);
+        for (i = 0; i < ghosts.length; i += 1) {
+          ghosts[i].makeEatable(ctx);
+        }
+        if (level < levelData.length) {
+          setState(PLAYING);
+        } else {
+          setState(WAITING);
+          Pacman.MAP = levelData[0].map;
+          map.reset();
+        }
       }
     } else if (e.keyCode === KEY.S) {
       audio.toggleSound();
@@ -1363,6 +1372,12 @@ var PACMAN = (function () {
   }
 
   function completedLevel() {
+    if (level + 1 === levelData.length) {
+      level++;
+      setState(BOX);
+      dialog("You Win!");
+      return;
+    }
     setState(WAITING);
     console.log(`Beat Level ${level} Starting Level ${level + 1} 'Counter'`);
     audio.pauseBG();
@@ -1513,7 +1528,9 @@ var PACMAN = (function () {
 
   function handleTextBox() {
     box.children[0].src =
-      levelData[level].card[isMobile ? "vertical" : "horizontal"];
+      level < levelData.length
+        ? levelData[level].card[isMobile ? "vertical" : "horizontal"]
+        : `./assets/cards/end-${isMobile ? "v" : "h"}.png`;
     box.style.removeProperty("display");
   }
 
@@ -1535,7 +1552,13 @@ var PACMAN = (function () {
       for (i = 0; i < ghosts.length; i += 1) {
         ghosts[i].makeEatable(ctx);
       }
-      setState(PLAYING);
+      if (level < levelData.length) {
+        setState(PLAYING);
+      } else {
+        setState(WAITING);
+        Pacman.MAP = levelData[0].map;
+        map.reset();
+      }
     } else if (state === PAUSE) {
       audio.resume();
       map.draw(ctx);
