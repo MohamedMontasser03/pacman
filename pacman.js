@@ -30,7 +30,7 @@ var NONE = 4,
   BOX = 12,
   Pacman = {};
 
-Pacman.FPS = 60;
+Pacman.FPS = 30;
 
 Pacman.WALL = 0;
 Pacman.BISCUIT = 1;
@@ -1330,6 +1330,10 @@ var PACMAN = (function () {
           setState(BOX);
         } else {
           died = false;
+
+          for (i = 0; i < ghosts.length; i += 1) {
+            ghosts[i].makeEatable(ctx);
+          }
           setState(PLAYING);
         }
         console.log(`Start level ${level}`);
@@ -1527,6 +1531,10 @@ var PACMAN = (function () {
       startNewGame();
     } else if (state === BOX) {
       box.style.setProperty("display", "none");
+
+      for (i = 0; i < ghosts.length; i += 1) {
+        ghosts[i].makeEatable(ctx);
+      }
       setState(PLAYING);
     } else if (state === PAUSE) {
       audio.resume();
