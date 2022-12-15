@@ -1236,7 +1236,8 @@ var PACMAN = (function () {
     ctx.fillStyle = "#FFFF00";
     ctx.font = `${0.8 * blockSize}px TomatoGroteskRegular`;
     ctx.fillText("Score: " + user.theScore(), blockSize * 1.67, textBase);
-    ctx.fillText("Level: " + level, 14.5 * blockSize, textBase);
+    if (level !== 0 && level < levelData.length)
+      ctx.fillText("Level: " + level, 14.5 * blockSize, textBase);
   }
 
   function redrawBlock(pos) {
