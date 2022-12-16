@@ -1313,6 +1313,8 @@ var PACMAN = (function () {
       stateChanged = false;
       map.draw(ctx);
       dialog(`${isMobile ? "Tap" : "Press N"} to start a New game`);
+      audio.pauseBG();
+      audio.playBG(0);
       console.log("Initail Render Of main menu");
     } else if (state === BOX && stateChanged) {
       stateChanged = false;
@@ -1333,6 +1335,7 @@ var PACMAN = (function () {
         user.drawDead(ctx, (tick - timerStart) / (Pacman.FPS * 2));
       }
     } else if (state === COUNTDOWN) {
+      audio.pauseBG();
       diff = 5 + Math.floor((timerStart - tick) / Pacman.FPS);
 
       if (diff === 0) {
