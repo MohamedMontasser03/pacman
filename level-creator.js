@@ -459,7 +459,7 @@ const APP = {
         reader.addEventListener("load", () => {
           // Make sure to parse correctly
           const levelState = JSON.parse(reader.result);
-          this.setLevelState(levelState);
+          this.setLevelState(levelState.levels);
           this.setCurLevel(0);
         });
         reader.readAsText(file);

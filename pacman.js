@@ -112,6 +112,20 @@ const wallInstructions = {
   },
 };
 
+async function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+
+    // check if image is already loaded
+    if (img.complete) {
+      resolve(img);
+    }
+  });
+}
+
 Pacman.Ghost = function (game, map, colour, img) {
   var position = null,
     direction = null,
@@ -1069,6 +1083,7 @@ var PACMAN = (function () {
   var state = WAITING,
     audio = null,
     levelData = null,
+    endCardData = null,
     ghosts = [],
     box = null,
     eatenCount = 0,
@@ -1410,7 +1425,8 @@ var PACMAN = (function () {
           ghost,
           canvas = document.createElement("canvas");
 
-        levelData = data;
+        levelData = data.levels;
+        endCardData = data.endCard;
 
         canvasWrapper = wrapper;
         var canvasWidth = blockSize * mapWidth;
@@ -1458,7 +1474,7 @@ var PACMAN = (function () {
         box.style.setProperty("display", "none");
 
         ctx = canvas.getContext("2d");
-        Pacman.MAP = data[0].map;
+        Pacman.MAP = data.levels[0].map;
 
         audio = new Pacman.Audio({ soundDisabled: soundDisabled });
         map = new Pacman.Map(blockSize);
@@ -1485,8 +1501,11 @@ var PACMAN = (function () {
           ["eating2", root + "assets/audio/eating.short" + extension],
         ];
 
-        for (let i = 0; i < Object.keys(data).length; i++) {
-          audio_files.push([`${i}`, root + data[i]["BG-Music"] + extension]);
+        for (let i = 0; i < Object.keys(data.levels).length; i++) {
+          audio_files.push([
+            `${i}`,
+            root + data.levels[i]["BG-Music"] + extension,
+          ]);
         }
         load(audio_files, function () {
           loaded();
@@ -1530,12 +1549,14 @@ var PACMAN = (function () {
     }
   }
 
-  function handleTextBox() {
+  async function handleTextBox() {
+    const newSrc = (
+      level < levelData.length ? levelData[level].card : endCardData
+    )[isMobile ? "vertical" : "horizontal"];
     box.children[0].src = "";
-    box.children[0].src =
-      level < levelData.length
-        ? levelData[level].card[isMobile ? "vertical" : "horizontal"]
-        : `./assets/cards/end-${isMobile ? "v" : "h"}.png`;
+    await loadImage(newSrc);
+    box.children[0].src = newSrc;
+
     box.style.removeProperty("display");
   }
 
