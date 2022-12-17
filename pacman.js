@@ -52,6 +52,8 @@ Pacman.RJUNC = 16;
 Pacman.DJUNC = 17;
 Pacman.LJUNC = 18;
 
+const imageCache = {};
+
 // method 0 = line, 1 = curve, 2 = complex
 const wallInstructions = {
   [Pacman.HWALL]: {
@@ -184,8 +186,7 @@ Pacman.Ghost = function (game, map, colour, img) {
     direction = getRandomDirection();
     due = getRandomDirection();
     if (img !== "") {
-      sprite = document.createElement("img");
-      sprite.src = img;
+      sprite = imageCache[img];
     }
   }
 
@@ -869,8 +870,7 @@ Pacman.Map = function (size) {
   }
 
   function drawPills(ctx) {
-    var img = new Image();
-    img.src = "./assets/thumb_dollarsgrid.png";
+    var img = imageCache["./assets/thumb_dollarsgrid.png"];
     const multi = 3;
     const curFrame = Math.floor(++pillSize / multi);
     if (curFrame >= 23) {
@@ -1419,7 +1419,7 @@ var PACMAN = (function () {
   function init(wrapper, root) {
     fetch("./levels.json")
       .then((res) => res.json())
-      .then((data) => {
+      .then(async (data) => {
         var i,
           len,
           ghost,
@@ -1474,7 +1474,7 @@ var PACMAN = (function () {
         box.style.setProperty("display", "none");
 
         ctx = canvas.getContext("2d");
-        Pacman.MAP = data.levels[0].map;
+        Pacman.MAP = levelData[0].map;
 
         audio = new Pacman.Audio({ soundDisabled: soundDisabled });
         map = new Pacman.Map(blockSize);
@@ -1490,6 +1490,8 @@ var PACMAN = (function () {
         map.draw(ctx);
         dialog("Loading ...");
 
+        await loadImages();
+
         var extension = Modernizr.audio.ogg ? ".ogg" : ".mp3";
 
         var audio_files = [
@@ -1501,16 +1503,36 @@ var PACMAN = (function () {
           ["eating2", root + "assets/audio/eating.short" + extension],
         ];
 
-        for (let i = 0; i < Object.keys(data.levels).length; i++) {
+        for (let i = 0; i < Object.keys(levelData).length; i++) {
           audio_files.push([
             `${i}`,
-            root + data.levels[i]["BG-Music"] + extension,
+            root + levelData[i]["BG-Music"] + extension,
           ]);
         }
         load(audio_files, function () {
           loaded();
         });
       });
+  }
+
+  async function loadImages() {
+    const insertIntoCache = (src) =>
+      loadImage(src).then((img) => {
+        imageCache[src] = img;
+      });
+
+    for (let i = 0; i < levelData.length; i++) {
+      for (let j = 0; j < levelData[i].ghosts.length; j++) {
+        await insertIntoCache(levelData[i].ghosts[j].img);
+      }
+      if (levelData[i].card) {
+        await insertIntoCache(
+          levelData[i].card[isMobile ? "vertical" : "horizontal"]
+        );
+      }
+    }
+    await insertIntoCache(endCardData[isMobile ? "vertical" : "horizontal"]);
+    await insertIntoCache("./assets/thumb_dollarsgrid.png");
   }
 
   function load(arr, callback) {
@@ -1553,8 +1575,6 @@ var PACMAN = (function () {
     const newSrc = (
       level < levelData.length ? levelData[level].card : endCardData
     )[isMobile ? "vertical" : "horizontal"];
-    box.children[0].src = "";
-    await loadImage(newSrc);
     box.children[0].src = newSrc;
 
     box.style.removeProperty("display");
