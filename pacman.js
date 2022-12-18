@@ -1575,7 +1575,9 @@ var PACMAN = (function () {
     const newSrc = (
       level < levelData.length ? levelData[level].card : endCardData
     )[isMobile ? "vertical" : "horizontal"];
-    box.children[0].src = newSrc;
+    box.removeChild(box.firstChild);
+    box.appendChild(imageCache[newSrc]);
+    box.firstChild.classList.add("card-img");
 
     box.style.removeProperty("display");
   }
