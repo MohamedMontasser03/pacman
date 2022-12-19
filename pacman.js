@@ -1436,6 +1436,11 @@ var PACMAN = (function () {
           "height",
           blockSize * mapHeight + footerHeight + "px"
         );
+        if (isMobile) {
+          // set zoom of page so the canvas is full width
+          var zoom = window.innerWidth / canvasWidth;
+          document.body.style.setProperty("zoom", zoom);
+        }
 
         if (innerWidth < canvasWidth) {
           document.body.style.setProperty("width", `${canvasWidth}px`);
@@ -1461,14 +1466,15 @@ var PACMAN = (function () {
         wrapper.appendChild(canvas);
         if (box.clientWidth > innerWidth) {
           var canvasPadding = 100;
-          box.style.setProperty(
-            "transform",
-            `scale(${
-              (innerWidth - canvasPadding) / box.clientWidth
-            }) translate(-${
-              (box.clientWidth - (innerWidth - canvasPadding)) / 2
-            }px, calc(-50% - ${footerHeight}px))`
-          );
+          !isMobile &&
+            box.style.setProperty(
+              "transform",
+              `scale(${
+                (innerWidth - canvasPadding) / box.clientWidth
+              }) translate(-${
+                (box.clientWidth - (innerWidth - canvasPadding)) / 2
+              }px, calc(-50% - ${footerHeight}px))`
+            );
           box.style.setProperty("left", `0`);
         }
         box.style.setProperty("display", "none");
