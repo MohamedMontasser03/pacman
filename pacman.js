@@ -1102,6 +1102,7 @@ var PACMAN = (function () {
     stored = null,
     offsetX = null,
     offsetY = null,
+    zoom = 1,
     canvasWrapper = null;
 
   function getTick() {
@@ -1438,7 +1439,7 @@ var PACMAN = (function () {
         );
         if (isMobile) {
           // set zoom of page so the canvas is full width
-          var zoom = window.innerWidth / canvasWidth;
+          zoom = window.innerWidth / canvasWidth;
           document.body.style.setProperty("zoom", zoom);
         }
 
@@ -1590,8 +1591,8 @@ var PACMAN = (function () {
 
   function handlePress(e) {
     if (
-      e.x - offsetX < blockSize &&
-      e.y - offsetY - mapHeight * blockSize + window.scrollY > 0
+      e.x - offsetX * zoom < blockSize &&
+      e.y + (-offsetY - mapHeight * blockSize + window.scrollY) * zoom > 0
     ) {
       audio.toggleSound();
       localStorage["soundDisabled"] = !soundDisabled();
